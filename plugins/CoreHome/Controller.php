@@ -199,7 +199,281 @@ class Piwik_CoreHome_Controller extends Piwik_Controller
 		$this->setGeneralVariablesView($view);
 		echo $view->render();
 	}
-	
+
+    public function renderDataTable($uniqueId = false)
+    {
+        if (empty($uniqueId)) {
+            $uniqueId = Piwik_Common::getRequestVar('uniqueId', '', 'string');
+        }
+        $uniqueId = str_replace('DataTable', '', $uniqueId);
+        $dataTable = Piwik_DataTableList::getInstance()->getDataTableByUniqueId($uniqueId);
+
+        if (empty($dataTable)) {
+            return '';
+        }
+
+        return $this->_renderDataTable($dataTable, __FUNCTION__);
+    }
+
+    public function renderDataTableWidget()
+    {
+        $uniqueId = Piwik_Common::getRequestVar('uniqueId', false, 'string');
+        $widget = Piwik_WidgetsList::getInstance()->getWidgetByUniqueId($uniqueId);
+
+        if (empty($widget)) {
+            return '';
+        }
+
+        return $this->_renderDataTable($widget, __FUNCTION__);
+    }
+
+    protected function _renderDataTable($widget, $function)
+    {
+        $defaultParameters = $widget['defaultParameters'];
+        $uniqueId          = $widget['uniqueId'].'DataTable';
+
+        // check if a subtable should be rendered
+        $renderSubTable = Piwik_Common::getRequestVar('renderSubTable', 0, 'int');
+        $idSubTable = Piwik_Common::getRequestVar('idSubtable', 0, 'int');
+        if ($renderSubTable == 1 && !empty($defaultParameters['subTable']) && $idSubTable) {
+
+            $defaultParameters = $defaultParameters['subTable'];
+            $uniqueId          = 'subDataTable_'.$idSubTable;
+        }
+
+        $apiMethod = Piwik_Common::getRequestVar('apiMethod', false, 'string', $defaultParameters);
+
+        if (empty($apiMethod)) {
+            return '';
+        }
+
+        $viewDataTable = Piwik_Common::getRequestVar('viewDataTable', 'table', 'string', $defaultParameters);
+
+        $view = Piwik_ViewDataTable::factory($viewDataTable);
+        $view->setUniqueIdViewDataTable($uniqueId);
+
+        $subTable = Piwik_Common::getRequestVar('subTable', array(), 'array', $defaultParameters);
+
+        $view->init( $this->pluginName,  $function, $apiMethod, !empty($subTable) );
+        $this->setPeriodVariablesView($view);
+        $this->setMetricsVariablesView($view);
+
+        $columnsToDisplay = Piwik_Common::getRequestVar('columns', false, 'string');
+
+        if (empty($columnsToDisplay)) {
+
+            $columnsToDisplay = Piwik_Common::getRequestVar('columnsToDisplay', false, 'string', $defaultParameters);
+        }
+
+        if (!empty($columnsToDisplay) && method_exists($view, 'setColumnsToDisplay')) {
+
+            if (is_string($columnsToDisplay)) {
+
+                $columnsToDisplay = explode(',', $columnsToDisplay);
+            }
+
+            $view->setColumnsToDisplay( $columnsToDisplay );
+        }
+
+        $selectableColumns = Piwik_Common::getRequestVar('selectableColumns', array(), 'array', $defaultParameters);
+
+        if (!empty($selectableColumns) && method_exists($view, 'setSelectableColumns')) {
+
+            $view->setSelectableColumns( $selectableColumns );
+        }
+
+        $disableSubTableWhenShowGoals = Piwik_Common::getRequestVar('disableSubTableWhenShowGoals', array(), 'array', $defaultParameters);
+
+        if (!empty($disableSubTableWhenShowGoals) && method_exists($view, 'disableSubTableWhenShowGoals')) {
+
+            $view->disableSubTableWhenShowGoals();
+        }
+
+        $showAllTicks = Piwik_Common::getRequestVar('showAllTicks', false, null, $defaultParameters);
+
+        if (!empty($showAllTicks) && method_exists($view, 'showAllTicks')) {
+
+            $view->showAllTicks();
+        }
+
+        $defaultSort      = Piwik_Common::getRequestVar('defaultSort', '', 'string', $defaultParameters);
+        $defaultSortOrder = Piwik_Common::getRequestVar('defaultSortOrder', 'desc', 'string', $defaultParameters);
+
+        if (!empty($defaultSort)) {
+
+            $view->setSortedColumn( $defaultSort, $defaultSortOrder );
+        }
+
+        $disableSort = Piwik_Common::getRequestVar('disableSort', false, null, $defaultParameters);
+
+        if ($disableSort === true) {
+
+            $view->disableSort();
+        }
+
+        $showGoals = Piwik_Common::getRequestVar('showGoals', false, null, $defaultParameters);
+
+        if ($showGoals === true) {
+
+            $view->enableShowGoals();
+        }
+
+        $disablePaginationControl = Piwik_Common::getRequestVar('disablePaginationControl', false, null, $defaultParameters);
+
+        if ($disablePaginationControl === true) {
+
+            $view->disableShowPaginationControl();
+        }
+
+        $disableExcludeLowPopulation = Piwik_Common::getRequestVar('disableExcludeLowPopulation', false, null, $defaultParameters);
+
+        if ($disableExcludeLowPopulation === true) {
+
+            $view->disableExcludeLowPopulation();
+        }
+
+        $disableOffsetInformation = Piwik_Common::getRequestVar('disableOffsetInformation', false, null, $defaultParameters);
+
+        if ($disableOffsetInformation === true) {
+
+            $view->disableOffsetInformation();
+        }
+
+        $disableShowBarChart = Piwik_Common::getRequestVar('disableShowBarChart', false, null, $defaultParameters);
+
+        if ($disableShowBarChart === true) {
+
+            $view->disableShowBarChart();
+        }
+
+        $disableRowEvolution = Piwik_Common::getRequestVar('disableRowEvolution', false, null, $defaultParameters);
+
+        if ($disableRowEvolution === true && method_exists($view, 'disableRowEvolution')) {
+
+            $view->disableRowEvolution();
+        }
+
+        $disableShowAllViewsIcons = Piwik_Common::getRequestVar('disableShowAllViewsIcons', false, null, $defaultParameters);
+
+        if ($disableShowAllViewsIcons === true) {
+
+            $view->disableShowAllViewsIcons();
+        }
+
+        $disableShowAllColumns = Piwik_Common::getRequestVar('disableShowAllColumns', false, null, $defaultParameters);
+
+        if ($disableShowAllColumns === true) {
+
+            $view->disableShowAllColumns();
+        }
+
+        $disableRowActions = Piwik_Common::getRequestVar('disableRowActions', false, null, $defaultParameters);
+
+        if ($disableRowActions === true && method_exists($view, 'disableRowActions')) {
+
+            $view->disableRowActions();
+        }
+
+        $disableGenericFilters = Piwik_Common::getRequestVar('disableGenericFilters', false, null, $defaultParameters);
+
+        if ($disableGenericFilters === true) {
+
+            $view->disableGenericFilters();
+        }
+
+        $disableShowExportAsRssFeed = Piwik_Common::getRequestVar('disableShowExportAsRssFeed', false, null, $defaultParameters);
+
+        if ($disableShowExportAsRssFeed === true) {
+
+            $view->disableShowExportAsRssFeed();
+        }
+
+        $limit = Piwik_Common::getRequestVar('limit', 0, null, $defaultParameters);
+
+        if ($limit > 0) {
+
+            $view->setLimit($limit);
+        }
+
+        $limitGraph = Piwik_Common::getRequestVar('limitGraph', 0, null, $defaultParameters);
+
+        if ($limitGraph > 0 && method_exists($view, 'setGraphLimit')) {
+
+            $view->setGraphLimit($limitGraph);
+        }
+
+        $disableSearch = Piwik_Common::getRequestVar('disableSearch', false, null, $defaultParameters);
+
+        if ($disableSearch === true) {
+
+            $view->disableSearchBox();
+        }
+
+        if (!empty($defaultParameters['footerMessage'])) {
+
+            $view->setFooterMessage($defaultParameters['footerMessage']);
+        }
+
+        $view->setColumnTranslation('nb_conversions', Piwik_Translate('Goals_ColumnConversions'));
+        $view->setColumnTranslation('revenue', Piwik_Translate('General_TotalRevenue'));
+
+        $columnsToTranslate = Piwik_Common::getRequestVar('columnsToTranslate', array(), 'array', $defaultParameters);
+
+        if (!empty($columnsToTranslate) && is_array($columnsToTranslate)) {
+
+            foreach ($columnsToTranslate AS $label => $translationKey) {
+
+                $view->setColumnTranslation($label, Piwik_Translate($translationKey));
+            }
+        }
+
+        $reportDocumentation = Piwik_Common::getRequestVar('reportDocumentation', false, 'string', $defaultParameters);
+
+        if (!empty($reportDocumentation)) {
+
+            $view->setReportDocumentation(Piwik_Translate($reportDocumentation));
+        }
+
+        $template = Piwik_Common::getRequestVar('template', false, 'string', $defaultParameters);
+
+        if (!empty($template)) {
+
+            $view->setTemplate($template);
+        }
+
+        $customParameters = Piwik_Common::getRequestVar('customParameters', array(), 'array', $defaultParameters);
+
+        if (!empty($customParameters) && is_array($customParameters)) {
+
+            foreach ($customParameters AS $param => $value) {
+
+                $view->setCustomParameter($param, $value);
+            }
+        }
+
+        $relatedReports = Piwik_Common::getRequestVar('relatedReports', array(), 'array', $defaultParameters);
+
+        if (!empty($relatedReports) && is_array($relatedReports) && count($relatedReports) == 2 && is_array($relatedReports[1])) {
+
+            $view->setReportTitle($relatedReports[0]);
+
+            foreach ($relatedReports[1] AS $relatedReport => $title) {
+
+                $view->addRelatedReport('CoreHome', $function, $title, array('uniqueId' => $relatedReport));
+            }
+        }
+
+        $customFilter = Piwik_Common::getRequestVar('customFilter', array(), 'array', $defaultParameters);
+
+        if (!empty($customFilter) && is_array($customFilter)) {
+            
+            call_user_func($customFilter, $view);
+        }
+
+        return $this->renderView($view);
+    }
+
+
 	/**
 	 * Renders and echo's the in-app donate form w/ slider.
 	 */
