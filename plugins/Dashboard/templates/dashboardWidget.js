@@ -187,6 +187,12 @@
          */
         _createDashboardWidget: function(uniqueId) {
 
+            var widget = widgetsHelper.getWidgetObjectFromUniqueId(uniqueId);
+
+            if (!widget) {
+                this.uniqueId = uniqueId = this.widgetParameters.module + '-' + this.widgetParameters.action;
+            }
+
             var widgetName = widgetsHelper.getWidgetNameFromUniqueId(uniqueId);
             if (!widgetName) {
                 widgetName = _pk_translate('Dashboard_WidgetNotFound_js');
