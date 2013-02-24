@@ -19,11 +19,7 @@ class Piwik_Referers_Controller extends Piwik_Controller
 	{
 		$view = Piwik_View::factory('index');
 		
-		$view->graphEvolutionReferers = $this->getEvolutionGraph(true, Piwik_Common::REFERER_TYPE_DIRECT_ENTRY, array('nb_visits'));
 		$view->nameGraphEvolutionReferers = 'ReferersgetEvolutionGraph';
-		
-		// building the referers summary report
-		$view->dataTableRefererType = $this->getRefererType(true);
 		
 		$nameValues = $this->getReferersVisitorsByType();
 		
@@ -102,19 +98,16 @@ class Piwik_Referers_Controller extends Piwik_Controller
 		{
 			$referrersReportsByDimension = new Piwik_View_ReportsByDimension();
 			
-			$referrersReportsByDimension->addDataTableReport(
-				'Referers_ViewAllReferrers', 'Referers_WidgetGetAll', 'Referers-getAll');
+			$referrersReportsByDimension->addDataTableReport('Referers_ViewAllReferrers', 'Referers_WidgetGetAll', 'Referers-getAll');
 			
 			$byTypeCategory = Piwik_Translate('Referers_ViewReferrersBy', Piwik_Translate('Live_GoalType'));
-			$referrersReportsByDimension->addDataTableReport(
-				$byTypeCategory, 'Referers_WidgetKeywords', 'Referers-getKeywords');
+			$referrersReportsByDimension->addDataTableReport($byTypeCategory, 'Referers_WidgetKeywords', 'Referers-getKeywords');
 			$referrersReportsByDimension->addDataTableReport($byTypeCategory, 'SitesManager_Sites', 'Referers-getWebsites');
 			$referrersReportsByDimension->addDataTableReport($byTypeCategory, 'Referers_Campaigns', 'Referers-getCampaigns');
 			
 			$bySourceCategory = Piwik_Translate('Referers_ViewReferrersBy', Piwik_Translate('General_Source'));
 			$referrersReportsByDimension->addDataTableReport($bySourceCategory, 'Referers_Socials', 'Referers-getSocials');
-			$referrersReportsByDimension->addDataTableReport(
-				$bySourceCategory, 'Referers_SearchEngines', 'Referers-getSearchEngines');
+			$referrersReportsByDimension->addDataTableReport($bySourceCategory, 'Referers_SearchEngines', 'Referers-getSearchEngines');
 			
 			$result = $referrersReportsByDimension->render();
 		}
@@ -126,75 +119,6 @@ class Piwik_Referers_Controller extends Piwik_Controller
 	{
 		$view = Piwik_View::factory('searchEngines_Keywords');
 		echo $view->render();
-	}
-	
-	function getRefererType( $fetch = false)
-	{
-		$view = Piwik_ViewDataTable::factory('tableAllColumns');
-		$view->init( $this->pluginName,
-									__FUNCTION__,
-									'Referers.getRefererType',
-									'getRefererType'
-								);
-		$view->disableSearchBox();
-		$view->disableOffsetInformationAndPaginationControls();
-		$view->disableExcludeLowPopulation();
-		$view->disableSubTableWhenShowGoals();
-		$view->enableShowGoals();
-		$view->setLimit(10);
-		$view->setColumnsToDisplay( array('label', 'nb_visits') );
-		
-		$idSubtable = Piwik_Common::getRequestVar('idSubtable', false);
-		$labelColumnTitle = Piwik_Translate('Referers_ColumnRefererType');
-		if ($idSubtable !== false)
-		{
-			switch ($idSubtable)
-			{
-				case Piwik_Common::REFERER_TYPE_SEARCH_ENGINE:
-					$labelColumnTitle = Piwik_Translate('Referers_ColumnSearchEngine');
-					break;
-				case Piwik_Common::REFERER_TYPE_WEBSITE:
-					$labelColumnTitle = Piwik_Translate('Referers_ColumnWebsite');
-					break;
-				case Piwik_Common::REFERER_TYPE_CAMPAIGN:
-					$labelColumnTitle = Piwik_Translate('Referers_ColumnCampaign');
-					break;
-				default:
-					break;
-			}
-		}
-		$view->setColumnTranslation('label', $labelColumnTitle);
-		
-		$this->setMetricsVariablesView($view);
-		return $this->renderView($view, $fetch);
-	}
-	
-	/**
-	 * Returns or echo's a report that shows all search keyword, website and campaign
-	 * referrer information in one report.
-	 * 
-	 * @param bool $fetch True if the report HTML should be returned. If false, the
-	 *                    report is echo'd and nothing is returned.
-	 * @return string The report HTML or nothing if $fetch is set to false.
-	 */
-	public function getAll( $fetch = false )
-	{
-		$view = Piwik_ViewDataTable::factory();
-		$view->init($this->pluginName, __FUNCTION__, 'Referers.getAll');
-		#$view->disableExcludeLowPopulation();
-		#$view->setColumnTranslation('label', Piwik_Translate('Referers_Referrer'));
-		#$view->setColumnsToDisplay(array('label', 'nb_visits'));
-		#$view->enableShowGoals();
-		#$view->setLimit(20);
-		#$view->setCustomParameter('disable_row_actions', '1');
-		
-		$setGetAllHtmlPrefix = array($this, 'setGetAllHtmlPrefix');
-		$view->queueFilter(
-			'MetadataCallbackAddMetadata', array('referrer_type', 'html_label_prefix', $setGetAllHtmlPrefix));
-		
-		$view->setMetricsVariablesView($view);
-		
-		return $this->renderView($view, $fetch);
 	}
 
 	function indexWebsites($fetch = false)
@@ -248,67 +172,6 @@ class Piwik_Referers_Controller extends Piwik_Controller
 			$return[$nameVar] = $value;
 		}
 		return $return;
-	}
-
-	protected $referrerTypeToLabel = array(
-		Piwik_Common::REFERER_TYPE_DIRECT_ENTRY => 'Referers_DirectEntry',
-		Piwik_Common::REFERER_TYPE_SEARCH_ENGINE => 'Referers_SearchEngines',
-		Piwik_Common::REFERER_TYPE_WEBSITE => 'Referers_Websites',
-		Piwik_Common::REFERER_TYPE_CAMPAIGN => 'Referers_Campaigns',
-	);
-	
-	public function getEvolutionGraph( $fetch = false, $typeReferer = false, $columns = false)
-	{
-		$view = $this->getLastUnitGraph($this->pluginName, __FUNCTION__, 'Referers.getRefererType');
-		
-		$view->addTotalRow();
-		
-		// configure displayed columns
-		if(empty($columns))
-		{
-			$columns = Piwik_Common::getRequestVar('columns');
-			$columns = Piwik::getArrayFromApiParameter($columns);
-		}
-		$columns = !is_array($columns) ? array($columns) : $columns;
-		$view->setColumnsToDisplay($columns);
-		
-		// configure selectable columns
-		if (Piwik_Common::getRequestVar('period', false) == 'day') {
-			$selectable = array('nb_visits', 'nb_uniq_visitors', 'nb_actions');
-		} else {
-			$selectable = array('nb_visits', 'nb_actions');
-		}
-		$view->setSelectableColumns($selectable);
-		
-		// configure displayed rows
-		$visibleRows = Piwik_Common::getRequestVar('rows', false);
-		if ($visibleRows !== false)
-		{
-			// this happens when the row picker has been used
-			$visibleRows = Piwik::getArrayFromApiParameter($visibleRows);
-			
-			// typeReferer is redundant if rows are defined, so make sure it's not used
-			$view->setCustomParameter('typeReferer', false);
-		}
-		else
-		{
-			// use $typeReferer as default
-			if($typeReferer === false)
-			{
-				$typeReferer = Piwik_Common::getRequestVar('typeReferer', false);
-			}
-			$label = self::getTranslatedReferrerTypeLabel($typeReferer);
-			$total = Piwik_Translate('General_Total');
-			$visibleRows = array($label, $total);
-			$view->setParametersToModify(array('rows' => $label.','.$total));
-		}
-		$view->addRowPicker($visibleRows);
-		
-		$view->setReportDocumentation(Piwik_Translate('Referers_EvolutionDocumentation').'<br />'
-				.Piwik_Translate('General_BrokenDownReportDocumentation').'<br />'
-				.Piwik_Translate('Referers_EvolutionDocumentationMoreInfo', '&quot;'.Piwik_Translate('Referers_DetailsByRefererType').'&quot;'));
-		
-		return $this->renderView($view, $fetch);
 	}
 
 	function getKeywordsForPage()
@@ -448,22 +311,22 @@ function DisplayTopKeywords($url = "")
 	 * @param int $typeReferrer The referrer type. Referrer types are defined in Piwik_Common class.
 	 * @return string The URL that can be used to get a sparkline image.
 	 */
-	private function getReferrerUrlSparkline( $referrerType )
+	private function getReferrerUrlSparkline( $typeReferrer )
 	{
 		$totalRow = Piwik_Translate('General_Total');
 		return $this->getUrlSparklineForDataTable(
 			'Referers-getEvolutionGraph',
 			array('columns' => array('nb_visits'),
-				  'rows' => array(self::getTranslatedReferrerTypeLabel($referrerType), $totalRow),
-				  'typeReferer' => $referrerType)
+				  'rows' => array(self::getTranslatedReferrerTypeLabel($typeReferrer), $totalRow),
+				  'typeReferer' => $typeReferrer)
 		);
 	}
-	
+
 	/**
 	 * Returns an array containing the number of distinct referrers for each
 	 * referrer type.
-	 * 
-	 * @param string|false $date The date to use when getting metrics. If false, the
+	 *
+	 * @param string|bool $date  The date to use when getting metrics. If false, the
 	 *                           date query param is used.
 	 * @return array The metrics.
 	 */
@@ -495,7 +358,6 @@ function DisplayTopKeywords($url = "")
 	 * @param string $lastPeriodDate The date of the period in the past.
 	 * @param array $previousValues Array mapping view property names w/ past values. Keys
 	 *                              in this array should be the same as keys in $currentValues.
-	 * @param bool $isVisits Whether the values are counting visits or something else.
 	 */
 	private function addEvolutionPropertiesToView( $view, $date, $currentValues, $lastPeriodDate, $previousValues)
 	{

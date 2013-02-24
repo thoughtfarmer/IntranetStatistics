@@ -356,6 +356,13 @@ class Piwik_Referers extends Piwik_Plugin
 			'disableOffsetInformation'    => true,
 			'disablePaginationControl'    => true,
 			'showGoals'                   => true,
+			'subTable'                    => array(
+				'apiMethod'                   => 'Referers.getRefererType',
+				'disableSearch'               => true,
+				'disableExcludeLowPopulation' => true,
+				'columnsToTranslate'          => array('label' => $this->getRefererTypeLabelForCurrentSubTable()),
+				'columnsToDisplay'            => 'label,nb_visits',
+			),
 		), 'Referers_Referers', 'Referers_WidgetOverview');
 
 		// non widget data tables
@@ -365,6 +372,7 @@ class Piwik_Referers extends Piwik_Plugin
 			'columnsToTranslate'  => array('label' => 'Referers_ColumnRefererType'),
 			'columnsToDisplay'    => 'nb_visits',
 			'customFilter'        => array('Piwik_Referers', 'handleRowPicker'),
+			'addTotalRow'         => true,
 			'reportDocumentation' => Piwik_Translate('Referers_EvolutionDocumentation') . '<br />'
 				. Piwik_Translate('General_BrokenDownReportDocumentation') . '<br />'
 				. Piwik_Translate('Referers_EvolutionDocumentationMoreInfo', '&quot;' . Piwik_Translate('Referers_DetailsByRefererType') . '&quot;'),
@@ -399,6 +407,29 @@ class Piwik_Referers extends Piwik_Plugin
 		));
 	}
 
+	protected function getRefererTypeLabelForCurrentSubTable() {
+		$idSubtable = Piwik_Common::getRequestVar('idSubtable', false);
+		$labelColumnTitle = Piwik_Translate('Referers_ColumnRefererType');
+		if ($idSubtable !== false)
+		{
+			switch ($idSubtable)
+			{
+				case Piwik_Common::REFERER_TYPE_SEARCH_ENGINE:
+					$labelColumnTitle = Piwik_Translate('Referers_ColumnSearchEngine');
+					break;
+				case Piwik_Common::REFERER_TYPE_WEBSITE:
+					$labelColumnTitle = Piwik_Translate('Referers_ColumnWebsite');
+					break;
+				case Piwik_Common::REFERER_TYPE_CAMPAIGN:
+					$labelColumnTitle = Piwik_Translate('Referers_ColumnCampaign');
+					break;
+				default:
+					break;
+			}
+		}
+		return $labelColumnTitle;
+	}
+
 	/**
 	 * @param Piwik_ViewDataTable $view
 	 */
@@ -412,13 +443,24 @@ class Piwik_Referers extends Piwik_Plugin
 			$view->setColumnsToDisplay($columns);
 		}
 
-		$typeReferer = Piwik_Common::getRequestVar('typeReferer', false);
-		if ($typeReferer === false) {
-			$typeReferer = Piwik_Common::REFERER_TYPE_DIRECT_ENTRY;
+		// configure displayed rows
+		$visibleRows = Piwik_Common::getRequestVar('rows', false);
+		if ($visibleRows !== false)
+		{
+			// this happens when the row picker has been used
+			$visibleRows = Piwik::getArrayFromApiParameter($visibleRows);
+
+			// typeReferer is redundant if rows are defined, so make sure it's not used
+			$view->setCustomParameter('typeReferer', false);
 		}
-		$label       = Piwik_getRefererTypeLabel($typeReferer);
-		$label       = Piwik_Translate($label);
-		$visibleRows = array($label);
+		else
+		{
+			$typeReferer = Piwik_Common::getRequestVar('typeReferer', false);
+			$label = Piwik_Translate(Piwik_getRefererTypeLabel($typeReferer));
+			$total = Piwik_Translate('General_Total');
+			$visibleRows = array($label, $total);
+			$view->setParametersToModify(array('rows' => $label.','.$total));
+		}
 		$view->addRowPicker($visibleRows);
 	}
 
