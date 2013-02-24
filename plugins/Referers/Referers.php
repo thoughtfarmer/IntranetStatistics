@@ -42,6 +42,7 @@ class Piwik_Referers extends Piwik_Plugin
 			'ArchiveProcessing_Day.compute' => 'archiveDay',
 			'ArchiveProcessing_Period.compute' => 'archivePeriod',
 			'WidgetsList.add' => 'addWidgets',
+			'DataTableList.add' => 'addDataTables',
 			'Menu.add' => 'addMenus',
 			'Goals.getReportsWithGoalMetrics' => 'getReportsWithGoalMetrics',
 			'API.getReportMetadata' => 'getReportMetadata',
@@ -225,21 +226,248 @@ class Piwik_Referers extends Piwik_Plugin
 	/**
 	 * Adds Referer widgets
 	 */
-	function addWidgets()
+	public function addWidgets()
 	{
-		Piwik_AddWidget( 'Referers_Referers', 'Referers_WidgetKeywords', 'Referers', 'getKeywords');
-		Piwik_AddWidget( 'Referers_Referers', 'Referers_WidgetExternalWebsites', 'Referers', 'getWebsites');
-		Piwik_AddWidget( 'Referers_Referers', 'Referers_WidgetSocials', 'Referers', 'getSocials');
-		Piwik_AddWidget( 'Referers_Referers', 'Referers_WidgetSearchEngines', 'Referers', 'getSearchEngines');
-		Piwik_AddWidget( 'Referers_Referers', 'Referers_WidgetCampaigns', 'Referers', 'getCampaigns');
-		Piwik_AddWidget( 'Referers_Referers', 'Referers_WidgetOverview', 'Referers', 'getRefererType');
-		Piwik_AddWidget( 'Referers_Referers', 'Referers_WidgetGetAll', 'Referers', 'getAll');
-		if(Piwik_Archive::isSegmentationEnabled())
-		{
-    		Piwik_AddWidget( 'SEO', 'Referers_WidgetTopKeywordsForPages', 'Referers', 'getKeywordsForPage');
+		if (Piwik_Archive::isSegmentationEnabled()) {
+			Piwik_WidgetsList::getInstance()->add('SEO', 'Top Keywords for Page URL', 'ReferersgetKeywordsForPage', array(
+				'module' => 'Referers',
+				'action' => 'getKeywordsForPage'
+			));
 		}
 	}
-	
+
+	/**
+	 * Adds Referer datatables
+	 */
+	public function addDataTables()
+	{
+		Piwik_DataTableList::getInstance()->add('Referers-getAll', array(
+			'apiMethod'                    => 'Referers.getAll',
+			'columnsToTranslate'           => array('label' => 'Referers_Referrer'),
+			'columnsToDisplay'             => 'label,nb_visits',
+			'limit'                        => 20,
+			'disableExcludeLowPopulation'  => true,
+			'showGoals'                    => true,
+			'disableSubTableWhenShowGoals' => true,
+			'customParameters'             => array('disable_row_actions' => '1'),
+			'customFilter'                 => array('Piwik_Referers', 'appendGetAllFilters'),
+		), 'Referers_Referers', 'Referers_WidgetGetAll');
+		Piwik_DataTableList::getInstance()->add('Referers-getWebsites', array(
+			'apiMethod'                    => 'Referers.getWebsites',
+			'columnsToTranslate'           => array('label' => 'Referers_ColumnSocial'),
+			'columnsToDisplay'             => 'label,nb_visits',
+			'limit'                        => 25,
+			'disableExcludeLowPopulation'  => true,
+			'showGoals'                    => true,
+			'disableSubTableWhenShowGoals' => true,
+			'subTable'                     => array(
+				'apiMethod'                   => 'Referers.getUrlsFromWebsiteId',
+				'columnsToTranslate'          => array('label' => 'Referers_ColumnWebsitePage'),
+				'columnsToDisplay'            => 'label,nb_visits',
+				'limit'                       => 10,
+				'disableSearch'               => true,
+				'disableExcludeLowPopulation' => true,
+				'showGoals'                   => true,
+			),
+		), 'Referers_Referers', 'Referers_WidgetExternalWebsites');
+		Piwik_DataTableList::getInstance()->add('Referers-getSocials', array(
+			'apiMethod'                    => 'Referers.getSocials',
+			'columnsToTranslate'           => array('label' => 'Referers_ColumnSocial'),
+			'columnsToDisplay'             => 'label,nb_visits',
+			'limit'                        => 10,
+			'disableExcludeLowPopulation'  => true,
+			'showGoals'                    => true,
+			'disableSubTableWhenShowGoals' => true,
+			'footerMessage'                => !empty($_REQUEST['widget']) ? '' : Piwik_Translate('Referers_SocialFooterMessage'),
+			'subTable'                     => array(
+				'apiMethod'                   => 'Referers.getUrlsForSocial',
+				'columnsToTranslate'          => array('label' => 'Referers_ColumnWebsitePage'),
+				'columnsToDisplay'            => 'label,nb_visits',
+				'disableSearch'               => true,
+				'limit'                       => 10,
+				'disableExcludeLowPopulation' => true,
+				'showGoals'                   => true,
+			),
+		), 'Referers_Referers', 'Referers_WidgetSocials');
+		Piwik_DataTableList::getInstance()->add('Referers-getKeywords', array(
+			'apiMethod'                    => 'Referers.getKeywords',
+			'columnsToTranslate'           => array('label' => 'Referers_ColumnKeyword'),
+			'columnsToDisplay'             => 'label,nb_visits',
+			'limit'                        => 25,
+			'disableExcludeLowPopulation'  => true,
+			'disableSubTableWhenShowGoals' => true,
+			'showGoals'                    => true,
+			'subTable'                     => array(
+				'apiMethod'                   => 'Referers.getSearchEnginesFromKeywordId',
+				'disableSearch'               => true,
+				'disableExcludeLowPopulation' => true,
+				'columnsToTranslate'          => array('label' => 'Referers_ColumnSearchEngine'),
+				'columnsToDisplay'            => 'label,nb_visits',
+			),
+		), 'Referers_Referers', 'Referers_WidgetKeywords');
+		Piwik_DataTableList::getInstance()->add('Referers-getSearchEngines', array(
+			'apiMethod'                    => 'Referers.getSearchEngines',
+			'columnsToTranslate'           => array('label' => 'Referers_ColumnSearchEngine'),
+			'columnsToDisplay'             => 'label,nb_visits',
+			'limit'                        => 25,
+			'disableSearch'                => true,
+			'disableExcludeLowPopulation'  => true,
+			'disableSubTableWhenShowGoals' => true,
+			'showGoals'                    => true,
+			'subTable'                     => array(
+				'apiMethod'                   => 'Referers.getKeywordsFromSearchEngineId',
+				'disableSearch'               => true,
+				'disableExcludeLowPopulation' => true,
+				'columnsToTranslate'          => array('label' => 'Referers_ColumnKeyword'),
+				'columnsToDisplay'            => 'label,nb_visits',
+			),
+		), 'Referers_Referers', 'Referers_WidgetSearchEngines');
+
+		$help = Piwik_Translate('Referers_CampaignFooterHelp', array(	'<a target="_blank" href="http://piwik.org/docs/tracking-campaigns/">',
+									'</a> - <a target="_blank" href="http://piwik.org/docs/tracking-campaigns/url-builder/">',
+									'</a>'
+		));
+
+		Piwik_DataTableList::getInstance()->add('Referers-getCampaigns', array(
+			'apiMethod'                   => 'Referers.getCampaigns',
+			'columnsToTranslate'          => array('label' => 'Referers_ColumnCampaign'),
+			'columnsToDisplay'            => 'label,nb_visits',
+			'limit'                       => 25,
+			'disableSearch'               => true,
+			'disableExcludeLowPopulation' => true,
+			'showGoals'                   => true,
+			'footerMessage'               => $help,
+			'subTable'                    => array(
+				'apiMethod'                   => 'Referers.getKeywordsFromCampaignId',
+				'disableSearch'               => true,
+				'disableExcludeLowPopulation' => true,
+				'columnsToTranslate'          => array('label' => 'Referers_ColumnKeyword'),
+				'columnsToDisplay'            => 'label,nb_visits',
+			),
+		), 'Referers_Referers', 'Referers_WidgetCampaigns');
+		Piwik_DataTableList::getInstance()->add('Referers-getRefererType', array(
+			'apiMethod'                   => 'Referers.getRefererType',
+			'viewDataTable'               => 'tableAllColumns',
+			'columnsToTranslate'          => array('label' => 'Referers_ColumnRefererType'),
+			'columnsToDisplay'            => 'label,nb_visits',
+			'limit'                       => 10,
+			'disableSearch'               => true,
+			'disableExcludeLowPopulation' => true,
+			'disableOffsetInformation'    => true,
+			'disablePaginationControl'    => true,
+			'showGoals'                   => true,
+		), 'Referers_Referers', 'Referers_WidgetOverview');
+
+		// non widget data tables
+		Piwik_DataTableList::getInstance()->add('Referers-getEvolutionGraph', array(
+			'apiMethod'           => 'Referers.getRefererType',
+			'viewDataTable'       => 'graphEvolution',
+			'columnsToTranslate'  => array('label' => 'Referers_ColumnRefererType'),
+			'columnsToDisplay'    => 'nb_visits',
+			'customFilter'        => array('Piwik_Referers', 'handleRowPicker'),
+			'reportDocumentation' => Piwik_Translate('Referers_EvolutionDocumentation') . '<br />'
+				. Piwik_Translate('General_BrokenDownReportDocumentation') . '<br />'
+				. Piwik_Translate('Referers_EvolutionDocumentationMoreInfo', '&quot;' . Piwik_Translate('Referers_DetailsByRefererType') . '&quot;'),
+		));
+
+		Piwik_DataTableList::getInstance()->add('Referers-getNumberOfDistinctSearchEngines', array(
+			'apiMethod'          => 'Referers.getNumberOfDistinctSearchEngines',
+			'viewDataTable'      => 'graphEvolution',
+			'columnsToTranslate' => array('Referers_distinctSearchEngines' => 'Referers_DistinctSearchEngines'),
+			'columnsToDisplay'   => 'Referers_distinctSearchEngines',
+		));
+
+		Piwik_DataTableList::getInstance()->add('Referers-getNumberOfDistinctKeywords', array(
+			'apiMethod'          => 'Referers.getNumberOfDistinctKeywords',
+			'viewDataTable'      => 'graphEvolution',
+			'columnsToTranslate' => array('Referers_distinctKeywords' => 'Referers_DistinctKeywords'),
+			'columnsToDisplay'   => 'Referers_distinctKeywords',
+		));
+
+		Piwik_DataTableList::getInstance()->add('Referers-getNumberOfDistinctWebsites', array(
+			'apiMethod'          => 'Referers.getNumberOfDistinctWebsites',
+			'viewDataTable'      => 'graphEvolution',
+			'columnsToTranslate' => array('Referers_distinctWebsites' => 'Referers_DistinctWebsites'),
+			'columnsToDisplay'   => 'Referers_distinctWebsites',
+		));
+
+		Piwik_DataTableList::getInstance()->add('Referers-getNumberOfDistinctCampaigns', array(
+			'apiMethod'          => 'Referers.getNumberOfDistinctCampaigns',
+			'viewDataTable'      => 'graphEvolution',
+			'columnsToTranslate' => array('Referers_distinctCampaigns' => 'Referers_DistinctCampaigns'),
+			'columnsToDisplay'   => 'Referers_distinctCampaigns',
+		));
+	}
+
+	/**
+	 * @param Piwik_ViewDataTable $view
+	 */
+	public static function handleRowPicker($view)
+	{
+		// configure displayed columns
+		$columns = Piwik_Common::getRequestVar('columns', 'nb_visits');
+		if (!empty($columns)) {
+			$columns = Piwik::getArrayFromApiParameter($columns);
+			$columns = !is_array($columns) ? array($columns) : $columns;
+			$view->setColumnsToDisplay($columns);
+		}
+
+		$typeReferer = Piwik_Common::getRequestVar('typeReferer', false);
+		if ($typeReferer === false) {
+			$typeReferer = Piwik_Common::REFERER_TYPE_DIRECT_ENTRY;
+		}
+		$label       = Piwik_getRefererTypeLabel($typeReferer);
+		$label       = Piwik_Translate($label);
+		$visibleRows = array($label);
+		$view->addRowPicker($visibleRows);
+	}
+
+	/**
+	 * @param Piwik_ViewDataTable $view
+	 */
+	public static function appendGetAllFilters($view)
+	{
+		$view->queueFilter('MetadataCallbackAddMetadata', array('referrer_type', 'html_label_prefix', array('Piwik_Referers', 'setGetAllHtmlPrefix')));
+	}
+
+
+	/**
+	 * DataTable filter callback that returns the HTML prefix for a label in the
+	 * 'getAll' report based on the row's referrer type.
+	 *
+	 * @param int $referrerType The referrer type.
+	 * @return string
+	 */
+	public static function setGetAllHtmlPrefix( $referrerType )
+	{
+		// get singular label for referrer type
+		$indexTranslation = '';
+		switch($referrerType)
+		{
+			case Piwik_Common::REFERER_TYPE_DIRECT_ENTRY:
+				$indexTranslation = 'Referers_DirectEntry';
+				break;
+			case Piwik_Common::REFERER_TYPE_SEARCH_ENGINE:
+				$indexTranslation = 'Referers_ColumnKeyword';
+				break;
+			case Piwik_Common::REFERER_TYPE_WEBSITE:
+				$indexTranslation = 'Referers_ColumnWebsite';
+				break;
+			case Piwik_Common::REFERER_TYPE_CAMPAIGN:
+				$indexTranslation = 'Referers_ColumnCampaign';
+				break;
+			default:
+				// case of newsletter, partners, before Piwik 0.2.25
+				$indexTranslation = 'General_Others';
+				break;
+		}
+
+		$label = strtolower(Piwik_Translate($indexTranslation));
+
+		// return html that displays it as grey & italic
+		return '<span style="color:#999"><em>('.$label.')</em></span>';
+	}
+
 	/**
 	 * Adds Web Analytics menus
 	 */

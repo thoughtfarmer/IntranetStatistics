@@ -345,7 +345,7 @@ class Piwik_Dashboard_Controller extends Piwik_Controller
             foreach ($row as $widgetId => $widget) {
                 if (isset($widget->uniqueId)) {
                     if (!Piwik_WidgetsList::getInstance()->isDefined($widget->uniqueId)) {
-                        if(empty($widget->parameters) || !Piwik_DataTableList::getInstance()->isDefined($widget->parameters->module.'-'.$widget->parameters->action)) {
+                        if(empty($widget->parameters) || !Piwik_WidgetsList::getInstance()->isDefined($widget->parameters->module.'-'.$widget->parameters->action)) {
                             unset($row[$widgetId]);
                         }
                     }

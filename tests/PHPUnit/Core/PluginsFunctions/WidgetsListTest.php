@@ -23,6 +23,8 @@ class WidgetsListTest extends DatabaseTestCase
         IntegrationTestCase::createWebsite('2009-01-04 00:11:42');
 
         $_GET['idSite'] = 1;
+        $_GET['period'] = 'month';
+        $_GET['date']   = date('d-m-Y');
 
         $pluginsManager = Piwik_PluginsManager::getInstance();
         $pluginsToLoad  = Piwik_Config::getInstance()->Plugins['Plugins'];
@@ -70,6 +72,8 @@ class WidgetsListTest extends DatabaseTestCase
         Piwik_Goals_API::getInstance()->addGoal(1, 'Goal 1 - Thank you', 'title', 'Thank you', 'contains', $caseSensitive = false, $revenue = 10, $allowMultipleConversions = 1);
 
         $_GET['idSite'] = 1;
+        $_GET['period'] = 'month';
+        $_GET['date']   = date('d-m-Y');
 
         $pluginsManager = Piwik_PluginsManager::getInstance();
         $pluginsToLoad  = Piwik_Config::getInstance()->Plugins['Plugins'];
@@ -109,6 +113,8 @@ class WidgetsListTest extends DatabaseTestCase
         Piwik_Goals_API::getInstance()->addGoal(1, 'Goal 1 - Thank you', 'title', 'Thank you', 'contains', $caseSensitive = false, $revenue = 10, $allowMultipleConversions = 1);
 
         $_GET['idSite'] = 1;
+        $_GET['period'] = 'month';
+        $_GET['date']   = date('d-m-Y');
 
         $pluginsManager = Piwik_PluginsManager::getInstance();
         $pluginsToLoad  = Piwik_Config::getInstance()->Plugins['Plugins'];

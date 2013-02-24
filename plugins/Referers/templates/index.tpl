@@ -1,7 +1,6 @@
 <a name="evolutionGraph" graphId="{$nameGraphEvolutionReferers}"></a>
 <h2>{'Referers_Evolution'|translate}</h2>
-{$graphEvolutionReferers}
-
+{'Referers-getEvolutionGraph'|renderDataTable}
 <br />
 <div id='leftcolumn' style="position:relative">
 	<h2>{'Referers_Type'|translate}</h2>
@@ -61,7 +60,7 @@
 
 <div id='rightcolumn'>
 	<h2>{'Referers_DetailsByRefererType'|translate}</h2>
-	{$dataTableRefererType}
+    {'Referers-getRefererType'|renderDataTable}
 </div>
 
 <div style="clear:both;"></div>

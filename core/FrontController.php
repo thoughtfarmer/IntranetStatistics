@@ -121,13 +121,19 @@ class Piwik_FrontController
 		{
 			$action = $controller->getDefaultAction();
 		}
-		
+
 //		Piwik::log("Dispatching $module / $action, parameters: ".var_export($parameters, $return = true));
 		if( !is_callable(array($controller, $action)))
 		{
-			throw new Exception("Action '$action' not found in the controller '$controllerClassName'.");				
+            // check if a datatable would be available and render that one if possible
+            if (Piwik_DataTableList::getInstance()->isDefined($module.'-'.$action)) {
+                $parameters['uniqueId'] = $module . '-' . $action;
+                return $this->dispatch('CoreHome', 'renderDataTable', $parameters);
+            } else {
+                throw new Exception("Action '$action' not found in the controller '$controllerClassName'.");
+            }
 		}
-		
+
 		// Generic hook that plugins can use to modify any input to the function, 
 		// or even change the plugin being called
 		$params = array($controller, $action, $parameters);

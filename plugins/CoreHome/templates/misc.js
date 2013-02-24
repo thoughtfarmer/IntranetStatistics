@@ -143,10 +143,14 @@ $(document).ready(function() {
 		{
 			widgetParams[key] = decodeURIComponent(widgetParams[key]);
 		}
-		
-		var widgetUniqueId = widgetParams.module + widgetParams.action;
-		currentWidgetLoading = widgetUniqueId;
-		
+
+        if (widgetParams['uniqueId']) {
+            var widgetUniqueId = widgetParams['uniqueId'];
+        } else {
+		    var widgetUniqueId = widgetParams.module + widgetParams.action;
+        }
+        currentWidgetLoading = widgetUniqueId;
+
 		widgetsHelper.loadWidgetAjax(widgetUniqueId, widgetParams, function(response) {
 			// if the widget that was loaded was not for the latest clicked link, do nothing w/ the response
 			if (widgetUniqueId != currentWidgetLoading)

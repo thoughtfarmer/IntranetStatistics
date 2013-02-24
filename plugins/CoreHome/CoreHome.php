@@ -37,12 +37,28 @@ class Piwik_CoreHome extends Piwik_Plugin
 	/**
 	 * Adds the donate form widget.
 	 * 
-	 * @param Piwik_Event_Notification $notification  notification object
+	 * @param Piwik_Event_Notification   notification object
 	 */
-	public function addWidgets()
+	public function addWidgets($notification)
 	{
-		Piwik_AddWidget('Example Widgets', 'CoreHome_SupportPiwik', 'CoreHome', 'getDonateForm');
-		Piwik_AddWidget('Example Widgets', 'Installation_Welcome', 'CoreHome', 'getPromoVideo');
+		Piwik_WidgetsList::getInstance()->add(
+			'Example Widgets',
+			'CoreHome_SupportPiwik',
+			'CoreHome-getDonateForm',
+			array(
+				'module' => 'CoreHome',
+				'action' => 'getDonateForm'
+			)
+		);
+		Piwik_WidgetsList::getInstance()->add(
+			'Example Widgets',
+			'Installation_Welcome',
+			'CoreHome-getPromoVideo',
+			array(
+				'module' => 'CoreHome',
+				'action' => 'getPromoVideo'
+			)
+		);
 	}
 
 	/**

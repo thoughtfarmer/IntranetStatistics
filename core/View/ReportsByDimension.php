@@ -53,6 +53,30 @@ class Piwik_View_ReportsByDimension extends Piwik_View
 	}
 	
 	/**
+	 * Adds a datatable report to the list of reports to display.
+	 *
+	 * @param string $category The report's category. Can be a i18n token.
+	 * @param string $title The report's title. Can be a i18n token.
+	 * @param string $uniqueId uniqueId of the datatable to add
+	 * @param array $params The list of query parameters to use when loading the report.
+	 *                      This list overrides query parameters currently in use. For example,
+	 *                        array('idSite' => 2, 'viewDataTable' => 'goalsTable')
+	 *                      would mean the goals report for site w/ ID=2 will always be loaded.
+	 */
+	public function addDataTableReport( $category, $title, $uniqueId, $params = array() )
+	{
+		$params = $params + array('module' => 'CoreHome', 'action' => 'renderDataTable', 'uniqueId' => $uniqueId);
+
+		$categories = $this->dimensionCategories;
+		$categories[$category][] = array(
+			'title' => $title,
+			'params' => $params,
+			'url' => Piwik_Url::getCurrentQueryStringWithParametersModified($params)
+		);
+		$this->dimensionCategories = $categories;
+	}
+
+	/**
 	 * Adds a set of reports to the list of reports to display.
 	 * 
 	 * @param array $reports An array containing report information. The array requires
