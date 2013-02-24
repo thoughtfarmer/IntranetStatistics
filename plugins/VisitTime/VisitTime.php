@@ -31,7 +31,7 @@ class Piwik_VisitTime extends Piwik_Plugin
 		$hooks = array(
 			'ArchiveProcessing_Day.compute' => 'archiveDay',
 			'ArchiveProcessing_Period.compute' => 'archivePeriod',
-			'WidgetsList.add' => 'addWidgets',
+			'DataTableList.add' => 'addDataTables',
 			'Menu.add' => 'addMenu',
 			'Goals.getReportsWithGoalMetrics' => 'getReportsWithGoalMetrics',
 			'API.getReportMetadata' => 'getReportMetadata',
@@ -79,14 +79,87 @@ class Piwik_VisitTime extends Piwik_Plugin
 			'order' => 25,
 		);
 	}
-	
-	function addWidgets()
+
+	public function addDataTables()
 	{
-		Piwik_AddWidget( 'VisitsSummary_VisitsSummary', 'VisitTime_WidgetLocalTime', 'VisitTime', 'getVisitInformationPerLocalTime');
-		Piwik_AddWidget( 'VisitsSummary_VisitsSummary', 'VisitTime_WidgetServerTime', 'VisitTime', 'getVisitInformationPerServerTime');
-		Piwik_AddWidget( 'VisitsSummary_VisitsSummary', 'VisitTime_VisitsByDayOfWeek', 'VisitTime', 'getByDayOfWeek');
+		$relatedReport = null;
+		// add the visits by day of week as a related report, if the current period is not 'day'
+		if (Piwik_Common::getRequestVar('period', 'day') != 'day') {
+			$relatedReport = array(Piwik_Translate('VisitTime_LocalTime'), array(
+				'widgetVisitTimegetByDayOfWeek' => Piwik_Translate('VisitTime_VisitsByDayOfWeek')
+			));
+		}
+
+		Piwik_DataTableList::getInstance()->add('VisitTime-getVisitInformationPerLocalTime', array(
+			'apiMethod'                   => 'VisitTime.getVisitInformationPerLocalTime',
+			'viewDataTable'               => 'graphVerticalBar',
+			'columnsToTranslate'          => array('label' => 'VisitTime_ColumnLocalTime'),
+			'defaultSort'                 => 'label',
+			'defaultSortOrder'            => 'asc',
+			'limit'                       => 24,
+			'limitGraph'                  => 24,
+			'disableSearch'               => true,
+			'disableExcludeLowPopulation' => true,
+			'disableOffsetInformation'    => true,
+			'disablePaginationControl'    => true,
+			'relatedReports'              => $relatedReport,
+		), 'VisitsSummary_VisitsSummary', 'VisitTime_WidgetLocalTime');
+
+		Piwik_DataTableList::getInstance()->add('VisitTime-getVisitInformationPerServerTime', array(
+			'apiMethod'                   => 'VisitTime.getVisitInformationPerServerTime',
+			'viewDataTable'               => 'graphVerticalBar',
+			'columnsToTranslate'          => array('label' => 'VisitTime_ColumnServerTime'),
+			'defaultSort'                 => 'label',
+			'defaultSortOrder'            => 'asc',
+			'limit'                       => 24,
+			'limitGraph'                  => 24,
+			'disableSearch'               => true,
+			'disableExcludeLowPopulation' => true,
+			'disableOffsetInformation'    => true,
+			'disablePaginationControl'    => true,
+			'showGoals'                   => true,
+			'customParameters'            => array('hideFutureHoursWhenToday' => 1),
+		), 'VisitsSummary_VisitsSummary', 'VisitTime_WidgetServerTime');
+
+		Piwik_DataTableList::getInstance()->add('VisitTime-getByDayOfWeek', array(
+			'apiMethod'                   => 'VisitTime.getByDayOfWeek',
+			'viewDataTable'               => 'graphVerticalBar',
+			'columnsToTranslate'          => array('label' => 'VisitTime_DayOfWeek'),
+			'limit'                       => 7,
+			'limitGraph'                  => 7,
+			'disableSearch'               => true,
+			'disableExcludeLowPopulation' => true,
+			'disableOffsetInformation'    => true,
+			'disablePaginationControl'    => true,
+			'disableSort'                 => true,
+			'showAllTicks'                => true,
+			'customFilter'                => array('Piwik_VisitTime', 'appendFooterMessage'),
+		), 'VisitsSummary_VisitsSummary', 'VisitTime_VisitsByDayOfWeek');
 	}
-	
+
+	public static function appendFooterMessage($view)
+	{
+		// get query params
+		$idsite = Piwik_Common::getRequestVar('idSite');
+		$date   = Piwik_Common::getRequestVar('date');
+		$period = Piwik_Common::getRequestVar('period');
+
+		// create a period instance
+		$oSite   = new Piwik_Site($idsite);
+		$oPeriod = Piwik_Archive::makePeriodFromQueryParams($oSite, $period, $date);
+
+		// set the footer message using the period start & end date
+		$start = $oPeriod->getDateStart()->toString();
+		$end   = $oPeriod->getDateEnd()->toString();
+		if ($start == $end) {
+			$dateRange = $start;
+		} else {
+			$dateRange = $start . " &ndash; " . $end;
+		}
+
+		$view->setFooterMessage(Piwik_Translate('General_ReportGeneratedFrom', $dateRange));
+	}
+
 	function addMenu()
 	{
 		Piwik_AddMenu('General_Visitors', 'VisitTime_SubmenuTimes', array('module' => 'VisitTime', 'action' => 'index'));

@@ -31,7 +31,7 @@ class Piwik_VisitorInterest extends Piwik_Plugin
 		$hooks = array(
 			'ArchiveProcessing_Day.compute' => 'archiveDay',
 			'ArchiveProcessing_Period.compute' => 'archivePeriod',
-			'WidgetsList.add' => 'addWidgets',
+			'DataTableList.add' => 'addDataTables',
 			'Menu.add' => 'addMenu',
 			'API.getReportMetadata' => 'getReportMetadata',
 		);
@@ -103,12 +103,72 @@ class Piwik_VisitorInterest extends Piwik_Plugin
 		);
 	}
 
-	function addWidgets()
+	function addDataTables()
 	{
-		Piwik_AddWidget( 'General_Visitors', 'VisitorInterest_WidgetLengths', 'VisitorInterest', 'getNumberOfVisitsPerVisitDuration');
-		Piwik_AddWidget( 'General_Visitors', 'VisitorInterest_WidgetPages', 'VisitorInterest', 'getNumberOfVisitsPerPage');
-		Piwik_AddWidget( 'General_Visitors', 'VisitorInterest_visitsByVisitCount', 'VisitorInterest', 'getNumberOfVisitsByVisitCount');
-		Piwik_AddWidget( 'General_Visitors', 'VisitorInterest_WidgetVisitsByDaysSinceLast', 'VisitorInterest', 'getNumberOfVisitsByDaysSinceLast');
+		Piwik_DataTableList::getInstance()->add('VisitorInterest-getNumberOfVisitsPerVisitDuration', array(
+			'apiMethod'                   => 'VisitorInterest.getNumberOfVisitsPerVisitDuration',
+			'viewDataTable'               => 'cloud',
+			'columnsToTranslate'          => array('label' => 'VisitorInterest_ColumnVisitDuration'),
+			'columnsToDisplay'            => 'label,nb_visits',
+			'disableSort'                 => true,
+			'defaultSort'                 => 'label',
+			'defaultSortOrder'            => 'asc',
+			'limitGraph'                  => 10,
+			'disableExcludeLowPopulation' => true,
+			'disableOffsetInformation'    => true,
+			'disablePaginationControl'    => true,
+			'disableSearch'               => true,
+			'disableShowAllColumns'       => true,
+		), 'General_Visitors', 'VisitorInterest_WidgetLengths');
+
+		Piwik_DataTableList::getInstance()->add('VisitorInterest-getNumberOfVisitsPerPage', array(
+			'apiMethod'                   => 'VisitorInterest.getNumberOfVisitsPerPage',
+			'viewDataTable'               => 'cloud',
+			'columnsToTranslate'          => array('label' => 'VisitorInterest_ColumnPagesPerVisit'),
+			'columnsToDisplay'            => 'label,nb_visits',
+			'disableSort'                 => true,
+			'defaultSort'                 => 'label',
+			'defaultSortOrder'            => 'asc',
+			'limitGraph'                  => 10,
+			'disableExcludeLowPopulation' => true,
+			'disableOffsetInformation'    => true,
+			'disablePaginationControl'    => true,
+			'disableSearch'               => true,
+			'disableShowAllColumns'       => true,
+		), 'General_Visitors', 'VisitorInterest_WidgetPages');
+
+		Piwik_DataTableList::getInstance()->add('VisitorInterest-getNumberOfVisitsByVisitCount', array(
+			'apiMethod'                   => 'VisitorInterest.getNumberOfVisitsByVisitCount',
+			'columnsToTranslate'          => array('label'                => 'VisitorInterest_VisitNum',
+			                                       'nb_visits_percentage' => str_replace(' ', '&nbsp;', Piwik_Translate('General_ColumnPercentageVisits'))),
+			'columnsToDisplay'            => 'label,nb_visits,nb_visits_percentage',
+			'disableSort'                 => true,
+			'defaultSort'                 => 'label',
+			'defaultSortOrder'            => 'asc',
+			'limit'                       => 15,
+			'disableExcludeLowPopulation' => true,
+			'disableOffsetInformation'    => true,
+			'disablePaginationControl'    => true,
+			'disableSearch'               => true,
+			'disableShowAllViewsIcons'    => true,
+			'disableShowAllColumns'       => true,
+		), 'General_Visitors', 'VisitorInterest_visitsByVisitCount');
+
+		Piwik_DataTableList::getInstance()->add('VisitorInterest-getNumberOfVisitsByDaysSinceLast', array(
+			'apiMethod'                   => 'VisitorInterest.getNumberOfVisitsByDaysSinceLast',
+			'columnsToTranslate'          => array('label' => 'General_DaysSinceLastVisit'),
+			'columnsToDisplay'            => 'label,nb_visits',
+			'disableSort'                 => true,
+			'defaultSort'                 => 'label',
+			'defaultSortOrder'            => 'asc',
+			'limit'                       => 15,
+			'disableExcludeLowPopulation' => true,
+			'disableOffsetInformation'    => true,
+			'disablePaginationControl'    => true,
+			'disableSearch'               => true,
+			'disableShowAllViewsIcons'    => true,
+			'disableShowAllColumns'       => true,
+		), 'General_Visitors', 'VisitorInterest_WidgetVisitsByDaysSinceLast');
 	}
 	
 	function addMenu()

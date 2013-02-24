@@ -1,9 +1,9 @@
 <div id='leftcolumn'>
 <h2>{'VisitTime_LocalTime'|translate}</h2>
-{$dataTableVisitInformationPerLocalTime}
+{'VisitTime-getVisitInformationPerLocalTime'|renderDataTable}
 </div>
 
 <div id='rightcolumn'>
 <h2>{'VisitTime_ServerTime'|translate}</h2>
-{$dataTableVisitInformationPerServerTime}
+{'VisitTime-getVisitInformationPerServerTime'|renderDataTable}
 </div>

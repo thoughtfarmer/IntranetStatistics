@@ -18,8 +18,6 @@ class Piwik_VisitsSummary_Controller extends Piwik_Controller
 	public function index()
 	{
 		$view = Piwik_View::factory('index');
-		$this->setPeriodVariablesView($view);
-		$view->graphEvolutionVisitsSummary = $this->getEvolutionGraph( true, array('nb_visits') );
 		$this->setSparklinesAndNumbers($view);
 		echo $view->render();
 	}
@@ -27,63 +25,8 @@ class Piwik_VisitsSummary_Controller extends Piwik_Controller
 	public function getSparklines()
 	{
 		$view = Piwik_View::factory('sparklines');
-		$this->setPeriodVariablesView($view);
 		$this->setSparklinesAndNumbers($view);
 		echo $view->render();
-	}
-
-	public function getEvolutionGraph( $fetch = false, $columns = false )
-	{
-		if(empty($columns))
-		{
-			$columns = Piwik_Common::getRequestVar('columns');
-			$columns = Piwik::getArrayFromApiParameter($columns);
-		}
-		
-		$documentation = Piwik_Translate('VisitsSummary_VisitsSummaryDocumentation').'<br />'
-		     . Piwik_Translate('General_BrokenDownReportDocumentation').'<br /><br />'
-		     
-		     . '<b>'.Piwik_Translate('General_ColumnNbVisits').':</b> '
-		     . Piwik_Translate('General_ColumnNbVisitsDocumentation').'<br />'
-		     
-		     . '<b>'.Piwik_Translate('General_ColumnNbUniqVisitors').':</b> '
-		     . Piwik_Translate('General_ColumnNbUniqVisitorsDocumentation').'<br />'
-		     
-		     . '<b>'.Piwik_Translate('General_ColumnNbActions').':</b> '
-		     . Piwik_Translate('General_ColumnNbActionsDocumentation').'<br />'
-		     
-		     . '<b>'.Piwik_Translate('General_ColumnActionsPerVisit').':</b> '
-		     . Piwik_Translate('General_ColumnActionsPerVisitDocumentation');
-		
-		$selectableColumns = array(
-			// columns from VisitsSummary.get
-			'nb_visits',
-			'nb_uniq_visitors',
-			'avg_time_on_site',
-			'bounce_rate',
-			'nb_actions_per_visit',
-			'max_actions',
-			'nb_visits_converted',
-			// columns from Actions.get
-			'nb_pageviews',
-			'nb_uniq_pageviews',
-			'nb_downloads',
-			'nb_uniq_downloads',
-			'nb_outlinks',
-			'nb_uniq_outlinks'
-		);
-
-		$idSite = Piwik_Common::getRequestVar('idSite');
-		$displaySiteSearch = Piwik_Site::isSiteSearchEnabledFor($idSite);
-
-		if($displaySiteSearch) {
-			$selectableColumns[] = 'nb_searches';
-			$selectableColumns[] = 'nb_keywords';
-		}
-		$view = $this->getLastUnitGraphAcrossPlugins($this->pluginName, __FUNCTION__, $columns, 
-							$selectableColumns, $documentation);
-		
-		return $this->renderView($view, $fetch);
 	}
 
 	static public function getVisitsSummary()
@@ -109,20 +52,21 @@ class Piwik_VisitsSummary_Controller extends Piwik_Controller
 	
 	protected function setSparklinesAndNumbers($view)
 	{
-		$view->urlSparklineNbVisits 		= $this->getUrlSparkline( 'getEvolutionGraph', array('columns' => $view->displayUniqueVisitors ? array('nb_visits', 'nb_uniq_visitors') : array('nb_visits')));
-		$view->urlSparklineNbPageviews 		= $this->getUrlSparkline( 'getEvolutionGraph', array('columns' => array('nb_pageviews', 'nb_uniq_pageviews')));
-		$view->urlSparklineNbDownloads 	    = $this->getUrlSparkline( 'getEvolutionGraph', array('columns' => array('nb_downloads', 'nb_uniq_downloads')));
-		$view->urlSparklineNbOutlinks 		= $this->getUrlSparkline( 'getEvolutionGraph', array('columns' => array('nb_outlinks', 'nb_uniq_outlinks')));
-		$view->urlSparklineAvgVisitDuration = $this->getUrlSparkline( 'getEvolutionGraph', array('columns' => array('avg_time_on_site')));
-		$view->urlSparklineMaxActions 		= $this->getUrlSparkline( 'getEvolutionGraph', array('columns' => array('max_actions')));
-		$view->urlSparklineActionsPerVisit 	= $this->getUrlSparkline( 'getEvolutionGraph', array('columns' => array('nb_actions_per_visit')));
-		$view->urlSparklineBounceRate 		= $this->getUrlSparkline( 'getEvolutionGraph', array('columns' => array('bounce_rate')));
+		$this->setPeriodVariablesView($view);
+		$view->urlSparklineNbVisits 		= $this->getUrlSparklineForDataTable( 'widgetVisitsSummarygetEvolutionGraph', array('columns' => $view->displayUniqueVisitors ? array('nb_visits', 'nb_uniq_visitors') : array('nb_visits')));
+		$view->urlSparklineNbPageviews 		= $this->getUrlSparklineForDataTable( 'widgetVisitsSummarygetEvolutionGraph', array('columns' => array('nb_pageviews', 'nb_uniq_pageviews')));
+		$view->urlSparklineNbDownloads 	    = $this->getUrlSparklineForDataTable( 'widgetVisitsSummarygetEvolutionGraph', array('columns' => array('nb_downloads', 'nb_uniq_downloads')));
+		$view->urlSparklineNbOutlinks 		= $this->getUrlSparklineForDataTable( 'widgetVisitsSummarygetEvolutionGraph', array('columns' => array('nb_outlinks', 'nb_uniq_outlinks')));
+		$view->urlSparklineAvgVisitDuration = $this->getUrlSparklineForDataTable( 'widgetVisitsSummarygetEvolutionGraph', array('columns' => array('avg_time_on_site')));
+		$view->urlSparklineMaxActions 		= $this->getUrlSparklineForDataTable( 'widgetVisitsSummarygetEvolutionGraph', array('columns' => array('max_actions')));
+		$view->urlSparklineActionsPerVisit 	= $this->getUrlSparklineForDataTable( 'widgetVisitsSummarygetEvolutionGraph', array('columns' => array('nb_actions_per_visit')));
+		$view->urlSparklineBounceRate 		= $this->getUrlSparklineForDataTable( 'widgetVisitsSummarygetEvolutionGraph', array('columns' => array('bounce_rate')));
 
 		$idSite = Piwik_Common::getRequestVar('idSite');
 		$displaySiteSearch = Piwik_Site::isSiteSearchEnabledFor($idSite);
 		if($displaySiteSearch)
 		{
-			$view->urlSparklineNbSearches 	= $this->getUrlSparkline( 'getEvolutionGraph', array('columns' => array('nb_searches', 'nb_keywords')));
+			$view->urlSparklineNbSearches 	= $this->getUrlSparklineForDataTable( 'widgetVisitsSummarygetEvolutionGraph', array('columns' => array('nb_searches', 'nb_keywords')));
 		}
 		$view->displaySiteSearch = $displaySiteSearch;
 
@@ -164,7 +108,7 @@ class Piwik_VisitsSummary_Controller extends Piwik_Controller
 		{
 			$view->showOnlyActions = true;
 			$view->nbActions = $dataRow->getColumn('nb_actions');
-			$view->urlSparklineNbActions = $this->getUrlSparkline( 'getEvolutionGraph', array('columns' => array('nb_actions')));
+			$view->urlSparklineNbActions = $this->getUrlSparklineForDataTable( 'widgetVisitsSummarygetEvolutionGraph', array('columns' => array('nb_actions')));
 		}
 	}
 }

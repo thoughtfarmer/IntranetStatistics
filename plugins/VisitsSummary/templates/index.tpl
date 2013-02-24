@@ -3,7 +3,7 @@
 
 <h2>{'Referers_Evolution'|translate}</h2>
 
-{$graphEvolutionVisitsSummary}
+{'VisitsSummary-getEvolutionGraph'|renderDataTable}
 
 <h2>{'General_Report'|translate}</h2>
 {include file="VisitsSummary/templates/sparklines.tpl"}

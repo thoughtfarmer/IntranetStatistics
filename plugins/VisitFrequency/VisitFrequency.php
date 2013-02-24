@@ -31,6 +31,7 @@ class Piwik_VisitFrequency extends Piwik_Plugin
 		$hooks = array(
 			'ArchiveProcessing_Day.compute' => 'archiveDay',
 			'ArchiveProcessing_Period.compute' => 'archivePeriod',
+			'DataTableList.add' => 'addDataTables',
 			'WidgetsList.add' => 'addWidgets',
 			'Menu.add' => 'addMenu',
 			'API.getReportMetadata' => 'getReportMetadata',
@@ -67,12 +68,75 @@ class Piwik_VisitFrequency extends Piwik_Plugin
 		);
 	}
 
-	function addWidgets()
+	public function addWidgets()
 	{
-		Piwik_AddWidget( 'General_Visitors', 'VisitFrequency_WidgetOverview', 'VisitFrequency', 'getSparklines');
-		Piwik_AddWidget( 'General_Visitors', 'VisitFrequency_WidgetGraphReturning', 'VisitFrequency', 'getEvolutionGraph', array('columns' => array('nb_visits_returning')));
+		Piwik_WidgetsList::getInstance()->add('General_Visitors', 'VisitFrequency_WidgetOverview', 'widgetVisitFrequencygetSparklines', array(
+			'module' => 'VisitFrequency',
+			'action' => 'getSparklines'
+		));
 	}
-	
+
+	public function addDataTables()
+	{
+		$documentation = Piwik_Translate('VisitFrequency_ReturningVisitsDocumentation') . '<br />'
+			. Piwik_Translate('General_BrokenDownReportDocumentation') . '<br />'
+			. Piwik_Translate('VisitFrequency_ReturningVisitDocumentation');
+
+		$columnsToDisplay = array('nb_visits_returning');
+
+		$selectableColumns = array(
+			// columns from VisitFrequency.get
+			'nb_visits_returning',
+			'nb_actions_returning',
+			'nb_actions_per_visit_returning',
+			'bounce_rate_returning',
+			'avg_time_on_site_returning',
+			// columns from VisitsSummary.get
+			'nb_visits',
+			'nb_actions',
+			'nb_actions_per_visit',
+			'bounce_rate',
+			'avg_time_on_site'
+		);
+
+		$period = Piwik_Common::getRequestVar('period', false);
+		if ($period == 'day') {
+			// add number of unique (returning) visitors for period=day
+			$selectableColumns = array_merge(
+				array($selectableColumns[0]),
+				array('nb_uniq_visitors_returning'),
+				array_slice($selectableColumns, 1, -4),
+				array('nb_uniq_visitors'),
+				array_slice($selectableColumns, -4));
+		}
+
+		$idSite = Piwik_Common::getRequestVar('idSite');
+		$period = Piwik_Common::getRequestVar('period');
+		$date   = Piwik_Common::getRequestVar('date');
+		$meta   = Piwik_API_API::getInstance()->getReportMetadata($idSite, $period, $date);
+
+		$columns      = array_merge($columnsToDisplay, $selectableColumns);
+		$translations = array();
+		foreach ($meta as $reportMeta) {
+			if ($reportMeta['action'] == 'get' && !isset($reportMeta['parameters'])) {
+				foreach ($columns as $column) {
+					if (isset($reportMeta['metrics'][$column])) {
+						$translations[$column] = $reportMeta['metrics'][$column];
+					}
+				}
+			}
+		}
+
+		Piwik_DataTableList::getInstance()->add('VisitFrequency-getEvolutionGraph', array(
+			'apiMethod'           => 'API.get',
+			'viewDataTable'       => 'graphEvolution',
+			'reportDocumentation' => $documentation,
+			'columnsToTranslate'  => $translations,
+			'columnsToDisplay'    => implode(',', $columnsToDisplay),
+			'selectableColumns'   => $selectableColumns,
+		), 'General_Visitors', 'VisitFrequency_WidgetGraphReturning');
+	}
+
 	function addMenu()
 	{
 		Piwik_AddMenu('General_Visitors', 'VisitFrequency_SubmenuFrequency', array('module' => 'VisitFrequency', 'action' => 'index'));
