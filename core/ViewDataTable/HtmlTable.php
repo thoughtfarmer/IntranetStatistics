@@ -39,17 +39,17 @@ class Piwik_ViewDataTable_HtmlTable extends Piwik_ViewDataTable
 	 * @param string $currentControllerName
 	 * @param string $currentControllerAction
 	 * @param string $apiMethodToRequestDataTable
-	 * @param null|string $controllerActionCalledWhenRequestSubTable
+	 * @param null|string $isSubTableAvailable
 	 */
 	function init($currentControllerName,
 						$currentControllerAction,
 						$apiMethodToRequestDataTable,
-						$controllerActionCalledWhenRequestSubTable = null)
+                        $isSubTableAvailable = null)
 	{
 		parent::init($currentControllerName,
 						$currentControllerAction,
 						$apiMethodToRequestDataTable,
-						$controllerActionCalledWhenRequestSubTable);
+                        $isSubTableAvailable);
 		$this->dataTableTemplate = 'CoreHome/templates/datatable.tpl';
 		$this->variablesDefault['enable_sort'] = '1';
 		$this->setSortedColumn('nb_visits', 'desc');

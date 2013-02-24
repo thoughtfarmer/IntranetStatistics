@@ -144,7 +144,7 @@ abstract class Piwik_Controller
 									'controllerName' => $view->getCurrentControllerName(),
 									'controllerAction' => $view->getCurrentControllerAction(),
 									'apiMethodToRequestDataTable' => $view->getApiMethodToRequestDataTable(),
-									'controllerActionCalledWhenRequestSubTable' => $view->getControllerActionCalledWhenRequestSubTable(),
+									'isSubTableAvailable' => $view->isSubTableAvailable(),
 							)
 				);
 
@@ -157,6 +157,18 @@ abstract class Piwik_Controller
 		}
 		echo $rendered;
 	}
+
+    /**
+     * Renders the datatable with the given uniqueId
+     *
+     * @param string  $uniqueId  id of the datatable to render
+     *
+     * @return string
+     */
+    protected function _fetchDataTable($uniqueId)
+    {
+        return Piwik_FrontController::getInstance()->fetchDispatch('CoreHome','renderDataTable', array($uniqueId));
+    }
 	
 	/**
 	 * Returns a ViewDataTable object of an Evolution graph 
@@ -363,13 +375,44 @@ abstract class Piwik_Controller
 		{
 			if(is_array($value))
 			{
-				$value = rawurlencode(implode(',', $value));
+				$value = implode(',', $value);
 			}
 		}
 		$url = Piwik_Url::getCurrentQueryStringWithParametersModified($params);
 		return $url;
 	}
 	
+	/**
+	 * Returns the current URL to use in a img src=X to display a sparkline.
+	 * $action must be the name of a Controller method that requests data using the Piwik_ViewDataTable::factory
+	 * It will automatically build a sparkline by setting the viewDataTable=sparkline parameter in the URL.
+	 * It will also computes automatically the 'date' for the 'last30' days/weeks/etc.
+	 *
+	 * @param string  $dataTable         Unique id of datatable to render
+	 * @param array   $customParameters  Array of name => value of parameters to set in the generated GET url
+	 * @return string The generated URL
+	 */
+	protected function getUrlSparklineForDataTable( $dataTable, $customParameters = array() )
+	{
+		$params = $this->getGraphParamsModified(
+					array(	'viewDataTable' => 'sparkline',
+							'action' => 'renderDataTable',
+							'module' => 'CoreHome',
+                            'uniqueId' => $dataTable)
+					+ $customParameters
+				);
+		// convert array values to comma separated
+		foreach($params as &$value)
+		{
+			if(is_array($value))
+			{
+				$value = rawurlencode(implode(',', $value));
+			}
+		}
+		$url = Piwik_Url::getCurrentQueryStringWithParametersModified($params);
+		return $url;
+	}
+
 	/**
 	 * Sets the first date available in the calendar
 	 *

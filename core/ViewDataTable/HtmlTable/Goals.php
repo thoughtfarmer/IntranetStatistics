@@ -99,7 +99,7 @@ class Piwik_ViewDataTable_HtmlTable_Goals extends Piwik_ViewDataTable_HtmlTable
 	
 	public function disableSubTableWhenShowGoals()
 	{
-		$this->controllerActionCalledWhenRequestSubTable = null;
+		$this->isSubTableAvailable = false;
 	}
 	
 	public function setColumnsToDisplay($columnsNames)

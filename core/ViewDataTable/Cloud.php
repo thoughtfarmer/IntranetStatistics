@@ -35,17 +35,17 @@ class Piwik_ViewDataTable_Cloud extends Piwik_ViewDataTable
 	 * @param string $currentControllerName
 	 * @param string $currentControllerAction
 	 * @param string $apiMethodToRequestDataTable
-	 * @param null|string $controllerActionCalledWhenRequestSubTable
+	 * @param boolean $isSubTableAvailable
 	 */
 	function init($currentControllerName,
 						$currentControllerAction,
 						$apiMethodToRequestDataTable,
-						$controllerActionCalledWhenRequestSubTable = null)
+						$isSubTableAvailable = false)
 	{
 		parent::init($currentControllerName,
 						$currentControllerAction,
 						$apiMethodToRequestDataTable,
-						$controllerActionCalledWhenRequestSubTable);
+                        $isSubTableAvailable);
 		$this->dataTableTemplate = 'CoreHome/templates/cloud.tpl';
 		$this->disableOffsetInformation();
 		$this->disableExcludeLowPopulation();

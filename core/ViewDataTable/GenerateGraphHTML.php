@@ -36,17 +36,17 @@ abstract class Piwik_ViewDataTable_GenerateGraphHTML extends Piwik_ViewDataTable
 	 * @param string $currentControllerName
 	 * @param string $currentControllerAction
 	 * @param string $apiMethodToRequestDataTable
-	 * @param null $controllerActionCalledWhenRequestSubTable
+	 * @param boolean $isSubTableAvailable
 	 */
 	function init($currentControllerName,
 						$currentControllerAction,
 						$apiMethodToRequestDataTable,
-						$controllerActionCalledWhenRequestSubTable = null)
+                        $isSubTableAvailable = false)
 	{
 		parent::init($currentControllerName,
 						$currentControllerAction,
 						$apiMethodToRequestDataTable,
-						$controllerActionCalledWhenRequestSubTable);
+                        $isSubTableAvailable);
 		
 		$this->dataTableTemplate = 'CoreHome/templates/graph.tpl';
 		
@@ -192,7 +192,7 @@ abstract class Piwik_ViewDataTable_GenerateGraphHTML extends Piwik_ViewDataTable
 			}
 			$_GET[$key] = $val;
 		}
-		$content = Piwik_FrontController::getInstance()->fetchDispatch($this->currentControllerName, $this->currentControllerAction, array());
+		$content = Piwik_FrontController::getInstance()->fetchDispatch($this->currentControllerName, $this->currentControllerAction, array($this->uniqIdTable));
 
 		$_GET = $saveGet;
 

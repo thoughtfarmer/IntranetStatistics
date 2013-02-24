@@ -116,9 +116,9 @@ abstract class Piwik_ViewDataTable
 	
 	/**
 	 * @see init()
-	 * @var string
+	 * @var boolean
 	 */
-	protected $controllerActionCalledWhenRequestSubTable = null;
+	protected $isSubTableAvailable = false;
 	
 	/**
 	 * @see init()
@@ -266,28 +266,22 @@ abstract class Piwik_ViewDataTable
 	 * the calling controller action, eg. 'Referers' 'getLongListOfKeywords'.
 	 * The initialization also requires the $apiMethodToRequestDataTable of the API method
 	 * to call in order to get the DataTable, eg. 'Referers.getKeywords'.
-	 * The optional $controllerActionCalledWhenRequestSubTable defines the method name of the API to call when there is a idSubtable.
-	 * This value would be used by the javascript code building the GET request to the API.
-	 *
-	 * Example:
-	 * 	For the keywords listing, a click on the row loads the subTable of the Search Engines for this row.
-	 *  In this case $controllerActionCalledWhenRequestSubTable = 'getSearchEnginesFromKeywordId'.
-	 *  The GET request will hit 'Referers.getSearchEnginesFromKeywordId'.
+	 * The optional isSubTableAvailable defines if there are subtables available.
 	 *
 	 * @param string $currentControllerName eg. 'Referers'
 	 * @param string $currentControllerAction eg. 'getKeywords'
 	 * @param string $apiMethodToRequestDataTable eg. 'Referers.getKeywords'
-	 * @param string $controllerActionCalledWhenRequestSubTable eg. 'getSearchEnginesFromKeywordId'
+	 * @param boolean $isSubTableAvailable
 	 */
 	public function init( $currentControllerName,
 						$currentControllerAction,
 						$apiMethodToRequestDataTable,
-						$controllerActionCalledWhenRequestSubTable = null)
+                        $isSubTableAvailable = false)
 	{
 		$this->currentControllerName = $currentControllerName;
 		$this->currentControllerAction = $currentControllerAction;
 		$this->apiMethodToRequestDataTable = $apiMethodToRequestDataTable;
-		$this->controllerActionCalledWhenRequestSubTable = $controllerActionCalledWhenRequestSubTable;
+		$this->isSubTableAvailable = $isSubTableAvailable;
 		$this->idSubtable = Piwik_Common::getRequestVar('idSubtable', false, 'int');
 
 		$this->viewProperties['show_goals'] = false;
@@ -374,9 +368,9 @@ abstract class Piwik_ViewDataTable
 		return $this->apiMethodToRequestDataTable;
 	}
 
-	public function getControllerActionCalledWhenRequestSubTable()
+	public function isSubTableAvailable()
 	{
-		return $this->controllerActionCalledWhenRequestSubTable;
+		return $this->isSubTableAvailable;
 	}
 	
 	/**
@@ -768,7 +762,7 @@ abstract class Piwik_ViewDataTable
 		$javascriptVariablesToSet['module'] = $this->currentControllerName;
 		$javascriptVariablesToSet['action'] = $this->currentControllerAction;
 		$javascriptVariablesToSet['viewDataTable'] = $this->getViewDataTableId();
-		$javascriptVariablesToSet['controllerActionCalledWhenRequestSubTable'] = $this->controllerActionCalledWhenRequestSubTable;
+		$javascriptVariablesToSet['isSubTableAvailable'] = (int)$this->isSubTableAvailable;
 		
 		if($this->dataTable &&
 			// Piwik_DataTable_Array doesn't have the method
@@ -1363,7 +1357,7 @@ abstract class Piwik_ViewDataTable
 	public function addRelatedReport( $module, $action, $title, $queryParams = array() )
 	{
 		// don't add the related report if it references this report
-		if ($this->currentControllerName == $module && $this->currentControllerAction == $action)
+		if ($this->currentControllerName != 'CoreHome' && $this->currentControllerName == $module && $this->currentControllerAction == $action)
 		{
 			return;
 		}
@@ -1482,7 +1476,9 @@ abstract class Piwik_ViewDataTable
 	 */
 	private function getBaseReportUrl( $module, $action, $queryParams = array() )
 	{
-		$params = array_merge($queryParams, array('module' => $module, 'action' => $action));
+		$params = array_merge(array('module' => $module,
+                                    'action' => $action,
+                                    'uniqueId' => $this->getUniqueIdViewDataTable()), $queryParams);
 		
 		// unset all filter query params so the related report will show up in its default state,
 		// unless the filter param was in $queryParams
