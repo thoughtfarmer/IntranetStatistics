@@ -72,8 +72,8 @@ class Piwik_ExamplePlugin extends Piwik_Plugin
 	{
 		// we register the widgets so they appear in the "Add a new widget" window in the dashboard
 		// Note that the first two parameters can be either a normal string, or an index to a translation string
-		Piwik_AddWidget('ExamplePlugin_exampleWidgets', 'ExamplePlugin_exampleWidget', 'ExamplePlugin', 'exampleWidget');
-		Piwik_AddWidget('ExamplePlugin_exampleWidgets', 'ExamplePlugin_photostreamMatt', 'ExamplePlugin', 'photostreamMatt');
-		Piwik_AddWidget('ExamplePlugin_exampleWidgets', 'ExamplePlugin_piwikForumVisits', 'ExamplePlugin', 'piwikDownloads');
+		Piwik_WidgetsList::getInstance()->add('ExamplePlugin_exampleWidgets', 'ExamplePlugin_exampleWidget', 'ExamplePluginexampleWidget', array('module' => 'ExamplePlugin', 'action' => 'exampleWidget'));
+		Piwik_WidgetsList::getInstance()->add('ExamplePlugin_exampleWidgets', 'ExamplePlugin_photostreamMatt', 'ExamplePluginphotostreamMatt', array('module' => 'ExamplePlugin', 'action' => 'photostreamMatt'));
+		Piwik_WidgetsList::getInstance()->add('ExamplePlugin_exampleWidgets', 'ExamplePlugin_piwikForumVisits', 'ExamplePluginpiwikDownloads', array('module' => 'ExamplePlugin', 'action' => 'piwikDownloads'));
 	}
 }

@@ -37,7 +37,7 @@ class Piwik_CustomVariables extends Piwik_Plugin
 		$hooks = array(
 			'ArchiveProcessing_Day.compute' => 'archiveDay',
 			'ArchiveProcessing_Period.compute' => 'archivePeriod',
-			'WidgetsList.add' => 'addWidgets',
+			'DataTableList.add' => 'addDataTables',
 			'Menu.add' => 'addMenus',
 			'Goals.getReportsWithGoalMetrics' => 'getReportsWithGoalMetrics',
 			'API.getReportMetadata' => 'getReportMetadata',
@@ -46,9 +46,24 @@ class Piwik_CustomVariables extends Piwik_Plugin
 		return $hooks;
 	}
 
-	function addWidgets()
+	public function addDataTables()
 	{
-		Piwik_AddWidget( 'General_Visitors', 'CustomVariables_CustomVariables', 'CustomVariables', 'getCustomVariables');
+		Piwik_DataTableList::getInstance()->add('CustomVariables-getCustomVariables', array(
+			'apiMethod'          => 'CustomVariables.getCustomVariables',
+			'showGoals'          => true,
+			'columnsToTranslate' => array('label' => 'CustomVariables_ColumnCustomVariableName'),
+			'defaultSort'        => 'nb_visits',
+			'defaultSortOrder'   => 'desc',
+			'limit'              => 10,
+			'footerMessage'      => Piwik_Translate('CustomVariables_TrackingHelp', array('<a target="_blank" href="http://piwik.org/docs/custom-variables/">', '</a>')),
+			'subTable'           => array(
+				'apiMethod'                   => 'CustomVariables.getCustomVariablesValuesFromNameId',
+				'columnsToTranslate'          => array('label' => 'CustomVariables_ColumnCustomVariableValue'),
+				'showGoals'                   => true,
+				'disableSearch'               => true,
+				'disableExcludeLowPopulation' => true,
+			),
+		), 'General_Visitors', 'CustomVariables_CustomVariables');
 	}
 
 	function addMenus()

@@ -35,9 +35,9 @@ class Piwik_ExampleRssWidget extends Piwik_Plugin
 	public function getListHooksRegistered()
 	{
 		return array(
-            'AssetManager.getCssFiles' => 'getCssFiles',
-            'WidgetsList.add' => 'addWidgets'
-        );
+			'AssetManager.getCssFiles' => 'getCssFiles',
+			'WidgetsList.add'          => 'addWidgets',
+		);
 	}
 
 	/**
@@ -50,13 +50,18 @@ class Piwik_ExampleRssWidget extends Piwik_Plugin
 		$cssFiles[] = "plugins/ExampleRssWidget/templates/styles.css";
 	}
 
-    public function addWidgets()
-    {
-        Piwik_AddWidget('Example Widgets', 'Piwik.org Blog', 'ExampleRssWidget', 'rssPiwik');
-        Piwik_AddWidget('Example Widgets', 'Piwik Changelog', 'ExampleRssWidget', 'rssChangelog');
-    }
+	public function addWidgets()
+	{
+		Piwik_WidgetsList::getInstance()->add('Example Widgets', 'Piwik.org Blog', 'ExampleRssWidgetrssPiwik', array(
+			'module' => 'ExampleRssWidget',
+			'action' => 'rssPiwik'
+		));
+		Piwik_WidgetsList::getInstance()->add('Example Widgets', 'Piwik Changelog', 'ExampleRssWidgetrssChangelog', array(
+			'module' => 'ExampleRssWidget',
+			'action' => 'rssChangelog'
+		));
+	}
 }
-
 
 /**
  *

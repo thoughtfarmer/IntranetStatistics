@@ -167,7 +167,7 @@ class Piwik_UserSettings extends Piwik_Plugin
 		$hooks = array(
 			'ArchiveProcessing_Day.compute' => 'archiveDay',
 			'ArchiveProcessing_Period.compute' => 'archivePeriod',
-			'WidgetsList.add' => 'addWidgets',
+			'DataTableList.add' => 'addDataTables',
 			'Menu.add' => 'addMenu',
 			'API.getReportMetadata' => 'getReportMetadata',
 		    'API.getSegmentsMetadata' => 'getSegmentsMetadata',
@@ -244,19 +244,136 @@ class Piwik_UserSettings extends Piwik_Plugin
 	    	);
 	    }
 	}
-	
+
 	/**
-	 * Adds the various User Settings widgets
+	 * Adds available datatables
 	 */
-	function addWidgets()
+	public function addDataTables()
 	{
-		// in this case, Widgets have same names as API reports
-		foreach($this->reportMetadata as $report)
-		{
-			list( $category, $name, $controllerName, $controllerAction ) = $report;
-			if($category == false) continue;
-			Piwik_AddWidget( $category, $name, $controllerName, $controllerAction );
-		}
+		Piwik_DataTableList::getInstance()->add('UserSettings-getResolution', array(
+			'apiMethod'                   => 'UserSettings.getResolution',
+			'columnsToTranslate'          => array('label' => 'UserSettings_ColumnResolution'),
+			'disableExcludeLowPopulation' => true,
+			'limit'                       => 5,
+			'limitGraph'                  => 5,
+			'disableSearch'               => true,
+		), 'UserSettings_VisitorSettings', 'UserSettings_WidgetResolutions');
+
+		Piwik_DataTableList::getInstance()->add('UserSettings-getBrowser', array(
+			'apiMethod'                   => 'UserSettings.getBrowser',
+			'columnsToTranslate'          => array('label' => 'UserSettings_ColumnBrowser'),
+			'disableExcludeLowPopulation' => true,
+			'limit'                       => 5,
+			'limitGraph'                  => 7,
+			'disableSearch'               => true,
+			'relatedReports'              => array(Piwik_Translate('UserSettings_Browsers'),
+				array('widgetUserSettingsgetBrowserVersion' => Piwik_Translate('UserSettings_ColumnBrowserVersion'))),
+		), 'UserSettings_VisitorSettings', 'UserSettings_WidgetBrowsers');
+
+		Piwik_DataTableList::getInstance()->add('UserSettings-getBrowserVersion', array(
+			'apiMethod'                   => 'UserSettings.getBrowserVersion',
+			'columnsToTranslate'          => array('label' => 'UserSettings_ColumnBrowserVersion'),
+			'disableExcludeLowPopulation' => true,
+			'limit'                       => 5,
+			'limitGraph'                  => 7,
+			'disableSearch'               => true,
+			'relatedReports'              => array(Piwik_Translate('UserSettings_ColumnBrowserVersion'),
+				array('widgetUserSettingsgetBrowser' => Piwik_Translate('UserSettings_ColumnBrowser'))),
+		), 'UserSettings_VisitorSettings', 'UserSettings_WidgetBrowserVersion');
+
+		Piwik_DataTableList::getInstance()->add('UserSettings-getBrowserType', array(
+			'apiMethod'                   => 'UserSettings.getBrowserType',
+			'columnsToTranslate'          => array('label' => 'UserSettings_ColumnBrowserFamily'),
+			'viewDataTable'               => 'graphPie',
+			'disableExcludeLowPopulation' => true,
+			'limit'                       => 5,
+			'limitGraph'                  => 5,
+			'disableSearch'               => true,
+			'disableOffsetInformation'    => true,
+			'disablePaginationControl'    => true,
+		), 'UserSettings_VisitorSettings', 'UserSettings_WidgetBrowserFamilies');
+
+		Piwik_DataTableList::getInstance()->add('UserSettings-getPlugin', array(
+			'apiMethod'                   => 'UserSettings.getPlugin',
+			'columnsToTranslate'          => array('label'                => 'UserSettings_ColumnPlugin',
+			                                       'nb_visits_percentage' => str_replace(' ', '&nbsp;', Piwik_Translate('General_ColumnPercentageVisits'))),
+			'columnsToDisplay'            => 'label,nb_visits_percentage,nb_visits',
+			'footerMessage'               => Piwik_Translate('UserSettings_PluginDetectionDoesNotWorkInIE'),
+			'defaultSort'                 => 'nb_visits_percentage',
+			'disableExcludeLowPopulation' => true,
+			'limit'                       => 10,
+			'disableSearch'               => true,
+			'disableOffsetInformation'    => true,
+			'disablePaginationControl'    => true,
+			'disableShowAllViewsIcons'    => true,
+			'disableShowAllColumns'       => true,
+		), 'UserSettings_VisitorSettings', 'UserSettings_WidgetPlugins');
+
+		Piwik_DataTableList::getInstance()->add('UserSettings-getWideScreen', array(
+			'apiMethod'                   => 'UserSettings.getWideScreen',
+			'columnsToTranslate'          => array('label' => 'UserSettings_ColumnTypeOfScreen'),
+			'disableExcludeLowPopulation' => true,
+			'limit'                       => 5,
+			'limitGraph'                  => 5,
+			'disableSearch'               => true,
+			'disableOffsetInformation'    => true,
+			'disablePaginationControl'    => true,
+			'relatedReports'              => array(Piwik_Translate('UserSettings_ColumnTypeOfScreen'),
+				array('widgetUserSettingsgetMobileVsDesktop' => Piwik_Translate('UserSettings_MobileVsDesktop')))
+		), 'UserSettings_VisitorSettings', 'UserSettings_WidgetWidescreen');
+
+		Piwik_DataTableList::getInstance()->add('UserSettings-getOS', array(
+			'apiMethod'                   => 'UserSettings.getOS',
+			'columnsToTranslate'          => array('label' => 'UserSettings_ColumnOperatingSystem'),
+			'disableExcludeLowPopulation' => true,
+			'limit'                       => 5,
+			'limitGraph'                  => 5,
+			'disableSearch'               => true,
+			'relatedReports'              => array(Piwik_Translate('UserSettings_OperatingSystems'),
+				array('widgetUserSettingsgetOSFamily' => Piwik_Translate('UserSettings_OperatingSystemFamily')))
+		), 'UserSettings_VisitorSettings', 'UserSettings_WidgetOperatingSystems');
+
+		Piwik_DataTableList::getInstance()->add('UserSettings-getConfiguration', array(
+			'apiMethod'                   => 'UserSettings.getConfiguration',
+			'columnsToTranslate'          => array('label' => 'UserSettings_ColumnConfiguration'),
+			'disableExcludeLowPopulation' => true,
+			'limit'                       => 3,
+			'limitGraph'                  => 5,
+			'disableSearch'               => true,
+		), 'UserSettings_VisitorSettings', 'UserSettings_WidgetGlobalVisitors');
+
+		Piwik_DataTableList::getInstance()->add('UserSettings-getOSFamily', array(
+			'apiMethod'                   => 'UserSettings.getOSFamily',
+			'columnsToTranslate'          => array('label' => 'UserSettings_OperatingSystemFamily'),
+			'disableExcludeLowPopulation' => true,
+			'limit'                       => 5,
+			'limitGraph'                  => 5,
+			'disableSearch'               => true,
+			'relatedReports'              => array(Piwik_Translate('UserSettings_OperatingSystemFamily'),
+				array('widgetUserSettingsgetOS' => Piwik_Translate('UserSettings_OperatingSystems')))
+		), 'UserSettings_VisitorSettings', 'UserSettings_WidgetOperatingSystemFamily');
+
+		Piwik_DataTableList::getInstance()->add('UserSettings-getMobileVsDesktop', array(
+			'apiMethod'                   => 'UserSettings.getMobileVsDesktop',
+			'columnsToTranslate'          => array('label' => 'UserSettings_MobileVsDesktop'),
+			'disableExcludeLowPopulation' => true,
+			'limit'                       => 5,
+			'limitGraph'                  => 5,
+			'disableSearch'               => true,
+			'relatedReports'              => array(Piwik_Translate('UserSettings_MobileVsDesktop'),
+				array('widgetUserSettingsgetWideScreen' => Piwik_Translate('UserSettings_ColumnTypeOfScreen')))
+		), 'UserSettings_VisitorSettings', 'UserSettings_MobileVsDesktop');
+
+		Piwik_DataTableList::getInstance()->add('UserSettings-getLanguage', array(
+			'apiMethod'                   => 'UserSettings.getLanguage',
+			'columnsToTranslate'          => array('label' => 'General_Language'),
+			'columnsToDisplay'            => 'label,nb_visits',
+			'defaultSort'                 => 'nb_visits',
+			'disableExcludeLowPopulation' => true,
+			'limit'                       => 5,
+			'limitGraph'                  => 5,
+			'disableSearch'               => true
+		), 'UserSettings_VisitorSettings', 'UserSettings_MobileVsDesktop');
 	}
 	
 	/**

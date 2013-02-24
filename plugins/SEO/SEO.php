@@ -32,6 +32,9 @@ class Piwik_SEO extends Piwik_Plugin
 	
 	function addWidgets()
 	{
-		Piwik_AddWidget('SEO', 'SEO_SeoRankings', 'SEO', 'getRank');
+		Piwik_WidgetsList::getInstance()->add('SEO', 'SEO_SeoRankings', 'widgetSEOgetRank', array(
+			'module' => 'SEO',
+			'action' => 'getRank'
+		));
 	}
 }

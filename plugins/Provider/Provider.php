@@ -34,7 +34,7 @@ class Piwik_Provider extends Piwik_Plugin
 			'ArchiveProcessing_Day.compute' => 'archiveDay',
 			'ArchiveProcessing_Period.compute' => 'archivePeriod',
 			'Tracker.newVisitorInformation' => 'logProviderInfo',
-			'WidgetsList.add' => 'addWidget',
+			'DataTableList.add' => 'addDataTable',
 			'Menu.add' => 'addMenu',
 			'API.getReportMetadata' => 'getReportMetadata',
 		    'API.getSegmentsMetadata' => 'getSegmentsMetadata',
@@ -100,9 +100,23 @@ class Piwik_Provider extends Piwik_Plugin
 		Piwik_Exec($query);
 	}
 	
-	function addWidget()
+	function addDataTable()
 	{
-		Piwik_AddWidget( 'General_Visitors', 'Provider_WidgetProviders', 'Provider', 'getProvider');
+		$column = 'nb_visits';
+
+		if (Piwik_Common::getRequestVar('period') == 'day') {
+
+			$column = 'nb_uniq_visitors';
+		}
+
+		Piwik_DataTableList::getInstance()->add('Provider-getProvider', array(
+			'apiMethod'          => 'Provider.getProvider',
+			'columnsToTranslate' => array('label' => 'Provider_ColumnProvider'),
+			'limit'              => 5,
+			'defaultSort'        => $column,
+			'defaultSortOrder'   => 'desc',
+			'columnsToDisplay'   => "label,$column"
+		), 'General_Visitors', 'Provider_WidgetProviders');
 	}
 	
 	function addMenu()
@@ -259,7 +273,7 @@ class Piwik_Provider extends Piwik_Plugin
 		$out =& $notification->getNotificationObject();
 		$out = '<div>
 			<h2>'.Piwik_Translate('Provider_WidgetProviders').'</h2>';
-		$out .= Piwik_FrontController::getInstance()->fetchDispatch('Provider','getProvider');
+		$out .= Piwik_FrontController::getInstance()->fetchDispatch('CoreHome','renderDataTable', array('Provider-getProvider'));
 		$out .= '</div>';
 	}
 

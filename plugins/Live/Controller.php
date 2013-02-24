@@ -54,39 +54,13 @@ class Piwik_Live_Controller extends Piwik_Controller
 		if(Piwik_Common::getRequestVar('previous', 0, 'int') == 1) {
 			$_GET['maxIdVisit'] = '';
 		}
-		
-		$view = Piwik_ViewDataTable::factory();
-		$view->init( $this->pluginName,
-							__FUNCTION__,
-						'Live.getLastVisitsDetails'
-						);
-		$view->disableGenericFilters();
-		$view->disableSort();
-		$view->setTemplate("Live/templates/visitorLog.tpl");
-		$view->setSortedColumn('idVisit', 'ASC');
-		$view->disableSearchBox();
-		$view->setLimit(20);
-		$view->disableOffsetInformation();
-		$view->disableExcludeLowPopulation();
-		
-		// disable the tag cloud,  pie charts, bar chart icons
-		$view->disableShowAllViewsIcons();
-		// disable the button "show more datas"
-		$view->disableShowAllColumns();
-		// disable the RSS feed
-		$view->disableShowExportAsRssFeed();
-		
-		// disable all row actions
-		if ($view instanceof Piwik_ViewDataTable_HtmlTable)
-		{
-			$view->disableRowActions();
+
+		$dataTable = $this->_fetchDataTable('Live-getVisitorLog');
+
+		if ($fetch) {
+			return $dataTable;
 		}
-		
-		$view->setReportDocumentation(Piwik_Translate('Live_VisitorLogDocumentation', array('<br />', '<br />')));
-		$view->setCustomParameter('dataTablePreviousIsFirst', 1);
-		$view->setCustomParameter('filterEcommerce', Piwik_Common::getRequestVar('filterEcommerce', 0, 'int'));
-		$view->setCustomParameter('pageUrlNotDefined', Piwik_Translate('General_NotDefined', Piwik_Translate('Actions_ColumnPageURL')));
-		return $this->renderView($view, $fetch);
+		echo $dataTable;
 	}
 
 	public function getLastVisitsStart($fetch = false)

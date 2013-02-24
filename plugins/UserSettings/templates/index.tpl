@@ -1,27 +1,27 @@
 <div id='leftcolumn'>
 	<h2>{'UserSettings_BrowserFamilies'|translate}</h2>
-	{$dataTableBrowserType}
+    {'UserSettings-getBrowserType'|renderDataTable}
 	
 	<h2>{'UserSettings_Browsers'|translate}</h2>
-	{$dataTableBrowser}
-	
+	{'UserSettings-getBrowser'|renderDataTable}
+
 	<h2>{'UserSettings_Plugins'|translate}</h2>
-	{$dataTablePlugin}
+	{'UserSettings-getPlugin'|renderDataTable}
 </div>
 
 <div id='rightcolumn'>
 	<h2>{'UserSettings_Configurations'|translate}</h2>
-	{$dataTableConfiguration}
+    {'UserSettings-getConfiguration'|renderDataTable}
 	
 	<h2>{'UserSettings_OperatingSystems'|translate}</h2>
-	{$dataTableOS}
+    {'UserSettings-getOS'|renderDataTable}
 	
 	<h2>{'UserSettings_Resolutions'|translate}</h2>
-	{$dataTableResolution}
+    {'UserSettings-getResolution'|renderDataTable}
 	
 	<h2>{'UserSettings_MobileVsDesktop'|translate}</h2>
-	{$dataTableMobileVsDesktop}
+    {'UserSettings-getMobileVsDesktop'|renderDataTable}
 
 	<h2>{'UserSettings_BrowserLanguage'|translate}</h2>
-	{$dataTableBrowserLanguage}
+    {'UserSettings-getLanguage'|renderDataTable}
 </div>
