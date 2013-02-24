@@ -20,7 +20,7 @@ class Piwik_Dashboard_Controller extends Piwik_Controller
         $view = Piwik_View::factory($template);
         $this->setGeneralVariablesView($view);
 
-        $view->availableWidgets = Piwik_Common::json_encode(Piwik_GetWidgetsList());
+        $view->availableWidgets = Piwik_Common::json_encode(Piwik_WidgetsList::getInstance()->get());
         $view->availableLayouts = $this->getAvailableLayouts();
 
         $view->dashboardId     = Piwik_Common::getRequestVar('idDashboard', 1, 'int');
@@ -53,7 +53,7 @@ class Piwik_Dashboard_Controller extends Piwik_Controller
         $this->checkTokenInUrl();
 
 	    Piwik_DataTable_Renderer_Json::sendHeaderJSON();
-        echo Piwik_Common::json_encode(Piwik_GetWidgetsList());
+        echo Piwik_Common::json_encode(Piwik_WidgetsList::getInstance()->get());
     }
 
     public function getDashboardLayout()
@@ -343,11 +343,11 @@ class Piwik_Dashboard_Controller extends Piwik_Controller
             }
 
             foreach ($row as $widgetId => $widget) {
-                if (isset($widget->parameters->module)) {
-                    $controllerName   = $widget->parameters->module;
-                    $controllerAction = $widget->parameters->action;
-                    if (!Piwik_IsWidgetDefined($controllerName, $controllerAction)) {
-                        unset($row[$widgetId]);
+                if (isset($widget->uniqueId)) {
+                    if (!Piwik_WidgetsList::getInstance()->isDefined($widget->uniqueId)) {
+                        if(empty($widget->parameters) || !Piwik_DataTableList::getInstance()->isDefined($widget->parameters->module.'-'.$widget->parameters->action)) {
+                            unset($row[$widgetId]);
+                        }
                     }
                 } else {
                     unset($row[$widgetId]);
@@ -363,7 +363,7 @@ class Piwik_Dashboard_Controller extends Piwik_Controller
         $defaultLayout = $this->_getLayoutForUser('', 1);
 
         if (empty($defaultLayout)) {
-        	$topWidget = '';
+
         	if (Piwik::isUserIsSuperUser())
         	{
         		$topWidget = '{"uniqueId":"widgetCoreHomegetDonateForm",'

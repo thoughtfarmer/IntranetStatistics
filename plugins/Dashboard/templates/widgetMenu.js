@@ -119,6 +119,7 @@ widgetsHelper.loadWidgetAjax = function (widgetUniqueId, widgetParameters, onWid
     }
 
     widgetParameters['widget'] = 1;
+    widgetParameters['uniqueId'] = widgetUniqueId;
 
     var ajaxRequest = new ajaxHelper();
     ajaxRequest.addParams(widgetParameters, 'get');

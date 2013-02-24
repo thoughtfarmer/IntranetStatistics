@@ -25,7 +25,7 @@ require_once PIWIK_INCLUDE_PATH . "/index.php";
 require_once PIWIK_INCLUDE_PATH . "/core/API/Request.php";
 
 Piwik_FrontController::getInstance()->init();
-$widgets = Piwik_GetWidgetsList();
+$widgets = Piwik_WidgetsList::getInstance()->get();
 foreach($widgets as $category => $widgetsInCategory)
 {
 	echo '<h2>'.$category . '</h2>';

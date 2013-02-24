@@ -29,7 +29,7 @@ dataTable.prototype =
 		{
 			domElem = $('#'+workingDivId);
 		}
-		
+
 		this.workingDivId = workingDivId;
 		this.loadedSubDataTable = {};
 		this.isEmpty = $('.pk-emptyDataTable', domElem).length > 0;
@@ -127,8 +127,8 @@ dataTable.prototype =
 	reloadAjaxDataTable: function(displayLoading, callbackSuccess)
 	{
 		var self = this;
-		
-		if (typeof displayLoading == "undefined") 
+
+		if (typeof displayLoading == "undefined")
 		{
 			displayLoading = true;
 		}
@@ -157,6 +157,13 @@ dataTable.prototype =
             if(typeof self.param[key] != "undefined" && self.param[key] != '')
                 params[key] = self.param[key];
         }
+
+        // set params required to render a datatable
+        if (!params.uniqueId) {
+            params.uniqueId = self.workingDivId;
+        }
+        params.action = 'renderDataTable';
+        params.module = 'CoreHome';
 
         var ajaxRequest = new ajaxHelper();
         ajaxRequest.addParams(params, 'get');
@@ -1250,18 +1257,16 @@ dataTable.prototype =
 					'</tr>'
 					);
 					
-					var savedActionVariable = self.param.action;
-					
 					// reset all the filters from the Parent table
 					var filtersToRestore = self.resetAllFilters();
 					// do not ignore the exclude low population click
 					self.param.enable_filter_excludelowpop = filtersToRestore.enable_filter_excludelowpop;
 					
 					self.param.idSubtable = idSubTable;
-					self.param.action = self.param.controllerActionCalledWhenRequestSubTable;
+					self.param.renderSubTable = 1;
 					self.reloadAjaxDataTable(false);
 					
-					self.param.action = savedActionVariable;
+					delete self.param.renderSubTable;
 					delete self.param.idSubtable;
 					self.restoreAllFilters(filtersToRestore);
 					
@@ -1859,7 +1864,6 @@ actionDataTable.prototype =
 				</td>\
 			</tr>\
 			');
-			var savedActionVariable = self.param.action;
 
 			// reset all the filters from the Parent table
 			var filtersToRestore = self.resetAllFilters();
@@ -1870,17 +1874,17 @@ actionDataTable.prototype =
 			this.param['enable_filter_excludelowpop'] = filtersToRestore['enable_filter_excludelowpop'];
 			
 			self.param.idSubtable = idSubTable;
-			self.param.action = self.param.controllerActionCalledWhenRequestSubTable;
-			
+			self.param.renderSubTable = 1;
+
 			self.reloadAjaxDataTable(false, function(resp){
 				self.actionsSubDataTableLoaded(resp);
 				self.repositionRowActions($(domElem));
 			});
-			self.param.action = savedActionVariable;
 
 			self.restoreAllFilters(filtersToRestore);
 			
-			delete self.param.idSubtable;		
+			delete self.param.renderSubTable;
+			delete self.param.idSubtable;
 		}
 		// else we toggle all these rows
 		else
@@ -1935,7 +1939,7 @@ actionDataTable.prototype =
 	dataTableLoaded: function(response, workingDivId)
 	{
 		var content = $(response);
-		var idToReplace = workingDivId || $(content).attr('id');		
+		var idToReplace = workingDivId || $(content).attr('id');
 		
 		//reset parents id
 		self.parentAttributeParent = '';
