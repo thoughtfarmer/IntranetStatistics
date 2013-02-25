@@ -19,13 +19,9 @@ class Piwik_UserCountry_Controller extends Piwik_Controller_Admin
 	{
 		$view = Piwik_View::factory('index');
 		
-		$view->urlSparklineCountries = $this->getUrlSparkline('getLastDistinctCountriesGraph');
+		$view->urlSparklineCountries = $this->getUrlSparklineForDataTable('UserCountry-getNumberOfDistinctCountries');
 		$view->numberDistinctCountries = $this->getNumberOfDistinctCountries(true);
 		
-		$view->dataTableCountry = $this->getCountry(true);
-		$view->dataTableContinent = $this->getContinent(true);
-		$view->dataTableRegion = $this->getRegion(true);
-		$view->dataTableCity = $this->getCity(true);
 		$view->visitorMap = Piwik_FrontController::getInstance()->fetchDispatch('UserCountryMap', 'visitorMap');
 
 		echo $view->render();
@@ -73,7 +69,7 @@ class Piwik_UserCountry_Controller extends Piwik_Controller_Admin
 		$this->setBasicVariablesView($view);
 		Piwik_Controller_Admin::setBasicVariablesAdminView($view);
 		$view->menu = Piwik_GetAdminMenu();
-		
+
 		echo $view->render();
 	}
 	
@@ -333,146 +329,12 @@ class Piwik_UserCountry_Controller extends Piwik_Controller_Admin
 		
 		echo $location;
 	}
-	
-	function getCountry( $fetch = false)
-	{
-		$view = $this->getStandardDataTableUserCountry(__FUNCTION__, "UserCountry.getCountry");
-		$view->setLimit( 5 );
-		$view->setColumnTranslation('label', Piwik_Translate('UserCountry_Country'));
-		$view->setReportDocumentation(Piwik_Translate('UserCountry_getCountryDocumentation'));
-		return $this->renderView($view, $fetch);
-	}
 
-	function getContinent( $fetch = false)
-	{
-		$view = $this->getStandardDataTableUserCountry(__FUNCTION__, "UserCountry.getContinent", 'table');
-		$view->disableSearchBox();
-		$view->disableOffsetInformationAndPaginationControls();
-		$view->setColumnTranslation('label', Piwik_Translate('UserCountry_Continent'));
-		$view->setReportDocumentation(Piwik_Translate('UserCountry_getContinentDocumentation'));
-		return $this->renderView($view, $fetch);
-	}
-	
-	/**
-	 * Echo's or returns an HTML view of the visits by region report.
-	 * 
-	 * @param bool $fetch If true, returns the HTML as a string, otherwise it is echo'd.
-	 * @return string
-	 */
-	public function getRegion( $fetch = false )
-	{
-		$view = $this->getStandardDataTableUserCountry(__FUNCTION__, "UserCountry.getRegion");
-		$view->setLimit(5);
-		$view->setColumnTranslation('label', Piwik_Translate('UserCountry_Region'));
-		$view->setReportDocumentation(Piwik_Translate('UserCountry_getRegionDocumentation').'<br/>'
-			. $this->getGeoIPReportDocSuffix());
-		$this->checkIfNoDataForGeoIpReport($view);
-		return $this->renderView($view, $fetch);
-	}
-	
-	/**
-	 * Echo's or returns an HTML view of the visits by city report.
-	 * 
-	 * @param bool $fetch If true, returns the HTML as a string, otherwise it is echo'd.
-	 * @return string
-	 */
-	public function getCity( $fetch = false )
-	{
-		$view = $this->getStandardDataTableUserCountry(__FUNCTION__, "UserCountry.getCity");
-		$view->setLimit(5);
-		$view->setColumnTranslation('label', Piwik_Translate('UserCountry_City'));
-		$view->setReportDocumentation(Piwik_Translate('UserCountry_getCityDocumentation').'<br/>'
-			. $this->getGeoIPReportDocSuffix());
-		$this->checkIfNoDataForGeoIpReport($view);
-		return $this->renderView($view, $fetch);
-	}
-	
-	private function getGeoIPReportDocSuffix()
-	{
-		return Piwik_Translate('UserCountry_GeoIPDocumentationSuffix', array(
-			'<a target="_blank" href="http://www.maxmind.com/?rId=piwik">',
-			'</a>',
-			'<a target="_blank" href="http://www.maxmind.com/en/city_accuracy?rId=piwik">',
-			'</a>'
-		));
-	}
-	
-	protected function getStandardDataTableUserCountry( $currentControllerAction, 
-												$APItoCall,
-												$defaultDatatableType = null )
-	{
-		$view = Piwik_ViewDataTable::factory( $defaultDatatableType );
-		$view->init( $this->pluginName, $currentControllerAction, $APItoCall );
-		$view->disableExcludeLowPopulation();
-	
-		$this->setPeriodVariablesView($view);
-		$this->setMetricsVariablesView($view);
-		
-		$view->enableShowGoals();
-		
-		return $view;
-	}
-	
 	function getNumberOfDistinctCountries( $fetch = false)
 	{
 		return $this->getNumericValue('UserCountry.getNumberOfDistinctCountries');
 	}
 
-	function getLastDistinctCountriesGraph( $fetch = false )
-	{
-		$view = $this->getLastUnitGraph('UserCountry',__FUNCTION__, "UserCountry.getNumberOfDistinctCountries");
-		$view->setColumnsToDisplay('UserCountry_distinctCountries');
-		return $this->renderView($view, $fetch);
-	}
-	
-	/**
-	 * Checks if a datatable for a view is empty and if so, displays a message in the footer
-	 * telling users to configure GeoIP.
-	 */
-	private function checkIfNoDataForGeoIpReport( $view )
-	{
-		// only display on HTML tables since the datatable for HTML graphs aren't accessible
-		if (!($view instanceof Piwik_ViewDataTable_HtmlTable))
-		{
-			return;
-		}
-		
-		// if there's only one row whose label is 'Unknown', display a message saying there's no data
-		$view->main();
-		$dataTable = $view->getDataTable();
-		if ($dataTable->getRowsCount() == 1
-			&& $dataTable->getFirstRow()->getColumn('label') == Piwik_Translate('General_Unknown'))
-		{
-			$footerMessage = Piwik_Translate('UserCountry_NoDataForGeoIPReport1');
-			
-			// if GeoIP is working, don't display this part of the message
-			if (!$this->isGeoIPWorking())
-			{
-				$params = array('module' => 'UserCountry', 'action' => 'adminIndex');
-				$footerMessage .= ' '.Piwik_Translate('UserCountry_NoDataForGeoIPReport2', array(
-					'<a target="_blank" href="'.Piwik_Url::getCurrentQueryStringWithParametersModified($params).'">',
-					'</a>',
-					'<a target="_blank" href="http://dev.maxmind.com/geoip/geolite?rId=piwik">',
-					'</a>'
-				));
-			}
-			else
-			{
-				$footerMessage .= ' '.Piwik_Translate('UserCountry_ToGeolocateOldVisits', array(
-					'<a target="_blank" href="http://piwik.org/faq/how-to/#faq_167">',
-					'</a>'
-				));
-			}
-			
-			// HACK! Can't use setFooterMessage because the view gets built in the main function,
-			// so instead we set the property by hand.
-			$realView = $view->getView();
-			$properties = $realView->properties;
-			$properties['show_footer_message'] = $footerMessage;
-			$realView->properties = $properties;
-		}
-	}
-	
 	/**
 	 * Gets information for the first missing GeoIP database (if any).
 	 * 
@@ -495,18 +357,5 @@ class Piwik_UserCountry_Controller extends Piwik_Controller_Admin
 			);
 		}
 		return false;
-	}
-	
-	/**
-	 * Returns true if a GeoIP provider is installed & working, false if otherwise.
-	 * 
-	 * @return bool
-	 */
-	private function isGeoIPWorking()
-	{
-		$provider = Piwik_UserCountry_LocationProvider::getCurrentProvider();
-		return $provider instanceof Piwik_UserCountry_LocationProvider_GeoIp
-			 && $provider->isAvailable() === true
-			 && $provider->isWorking() === true;
 	}
 }

@@ -46,7 +46,7 @@ class Piwik_UserCountry extends Piwik_Plugin
 		$hooks = array(
 			'ArchiveProcessing_Day.compute' => 'archiveDay',
 			'ArchiveProcessing_Period.compute' => 'archivePeriod',
-			'WidgetsList.add' => 'addWidgets',
+			'DataTableList.add' => 'addDataTables',
 			'Menu.add' => 'addMenu',
             'AdminMenu.add' => 'addAdminMenu',
 			'Goals.getReportsWithGoalMetrics' => 'getReportsWithGoalMetrics',
@@ -123,7 +123,7 @@ class Piwik_UserCountry extends Piwik_Plugin
 		printDebug("GEO: Found IP location (provider '". $id . "'): ". var_export($location, true));
 	}
 	
-	function addWidgets()
+	public function addDataTables()
 	{
 		$widgetContinentLabel = Piwik_Translate('UserCountry_WidgetLocation')
 							  . ' ('.Piwik_Translate('UserCountry_Continent').')';
@@ -133,11 +133,65 @@ class Piwik_UserCountry extends Piwik_Plugin
 							. ' ('.Piwik_Translate('UserCountry_Region').')';
 		$widgetCityLabel = Piwik_Translate('UserCountry_WidgetLocation')
 							. ' ('.Piwik_Translate('UserCountry_City').')';
-		
-		Piwik_AddWidget( 'General_Visitors', $widgetContinentLabel, 'UserCountry', 'getContinent');
-		Piwik_AddWidget( 'General_Visitors', $widgetCountryLabel, 'UserCountry', 'getCountry');
-		Piwik_AddWidget( 'General_Visitors', $widgetRegionLabel, 'UserCountry', 'getRegion');
-		Piwik_AddWidget( 'General_Visitors', $widgetCityLabel, 'UserCountry', 'getCity');
+
+		Piwik_DataTableList::getInstance()->add('UserCountry-getContinent', array(
+			'apiMethod'                   => 'UserCountry.getContinent',
+			'viewDataTable'               => 'graphVerticalBar',
+			'disableSearch'               => true,
+			'disableOffsetInformation'    => true,
+			'disablePaginationControl'    => true,
+			'disableExcludeLowPopulation' => true,
+			'showGoals'                   => true,
+			'columnsToTranslate'          => array('label' => 'UserCountry_Continent'),
+			'reportDocumentation'         => 'UserCountry_getContinentDocumentation',
+		), 'General_Visitors', $widgetContinentLabel);
+
+		Piwik_DataTableList::getInstance()->add('UserCountry-getCountry', array(
+			'apiMethod'                   => 'UserCountry.getCountry',
+			'disableExcludeLowPopulation' => true,
+			'showGoals'                   => true,
+			'limit'                       => 5,
+			'columnsToTranslate'          => array('label' => 'UserCountry_Country'),
+			'reportDocumentation'         => 'UserCountry_getCountryDocumentation',
+		), 'General_Visitors', $widgetCountryLabel);
+
+		Piwik_DataTableList::getInstance()->add('UserCountry-getRegion', array(
+			'apiMethod'                   => 'UserCountry.getRegion',
+			'disableExcludeLowPopulation' => true,
+			'showGoals'                   => true,
+			'limit'                       => 5,
+			'columnsToTranslate'          => array('label' => 'UserCountry_Region'),
+			'reportDocumentation'         => Piwik_Translate('UserCountry_getRegionDocumentation') . '<br/>' . $this->getGeoIPReportDocSuffix(),
+			'customFilter'                => array('Piwik_UserCountry', 'appendFooterMessageIfNoGeoIpData')
+		), 'General_Visitors', $widgetRegionLabel);
+
+		Piwik_DataTableList::getInstance()->add('UserCountry-getCity', array(
+			'apiMethod'                   => 'UserCountry.getCity',
+			'disableExcludeLowPopulation' => true,
+			'showGoals'                   => true,
+			'limit'                       => 5,
+			'columnsToTranslate'          => array('label' => 'UserCountry_City'),
+			'reportDocumentation'         => Piwik_Translate('UserCountry_getCityDocumentation') . '<br/>' . $this->getGeoIPReportDocSuffix(),
+			'customFilter'                => array('Piwik_UserCountry', 'appendFooterMessageIfNoGeoIpData')
+		), 'General_Visitors', $widgetCityLabel);
+
+		// not widget datatables
+		Piwik_DataTableList::getInstance()->add('UserCountry-getNumberOfDistinctCountries', array(
+			'apiMethod'          => 'UserCountry.getNumberOfDistinctCountries',
+			'viewDataTable'      => 'graphEvolution',
+			'columnsToTranslate' => array('Referers_distinctSearchEngines' => 'Referers_DistinctSearchEngines'),
+			'columnsToDisplay'   => 'UserCountry_distinctCountries',
+		));
+	}
+
+	private function getGeoIPReportDocSuffix()
+	{
+		return Piwik_Translate('UserCountry_GeoIPDocumentationSuffix', array(
+			'<a target="_blank" href="http://www.maxmind.com/?rId=piwik">',
+			'</a>',
+			'<a target="_blank" href="http://www.maxmind.com/en/city_accuracy?rId=piwik">',
+			'</a>'
+		));
 	}
 
 	function addMenu()
@@ -540,5 +594,66 @@ class Piwik_UserCountry extends Piwik_Plugin
 				$row->setMetadata('long', $long);
 			}
 		}
+	}
+
+	/**
+	 * Custom datatable filter used for rendering some datatables
+	 * Adds a footer message to the datatable if no data is available
+	 *
+	 * @static
+	 *
+	 * @param Piwik_ViewDataTable $view
+	 */
+	public static function appendFooterMessageIfNoGeoIpData($view)
+	{
+		// only display on HTML tables since the datatable for HTML graphs aren't accessible
+		if (!($view instanceof Piwik_ViewDataTable_HtmlTable)) {
+			return;
+		}
+
+		// if there's only one row whose label is 'Unknown', display a message saying there's no data
+		$view->main();
+		$dataTable = $view->getDataTable();
+		if ($dataTable->getRowsCount() == 1
+			&& $dataTable->getFirstRow()->getColumn('label') == Piwik_Translate('General_Unknown')
+		) {
+			$footerMessage = Piwik_Translate('UserCountry_NoDataForGeoIPReport1');
+
+			// if GeoIP is working, don't display this part of the message
+			if (!self::_isGeoIPWorking()) {
+				$params = array('module' => 'UserCountry', 'action' => 'adminIndex');
+				$footerMessage .= ' ' . Piwik_Translate('UserCountry_NoDataForGeoIPReport2', array(
+					'<a target="_blank" href="' . Piwik_Url::getCurrentQueryStringWithParametersModified($params) . '">',
+					'</a>',
+					'<a target="_blank" href="http://dev.maxmind.com/geoip/geolite?rId=piwik">',
+					'</a>'
+				));
+			} else {
+				$footerMessage .= ' ' . Piwik_Translate('UserCountry_ToGeolocateOldVisits', array(
+					'<a target="_blank" href="http://piwik.org/faq/how-to/#faq_167">',
+					'</a>'
+				));
+			}
+
+			// HACK! Can't use setFooterMessage because the view gets built in the main function,
+			// so instead we set the property by hand.
+			$realView                          = $view->getView();
+			$properties                        = $realView->properties;
+			$properties['show_footer_message'] = $footerMessage;
+			$realView->properties              = $properties;
+		}
+	}
+
+	/**
+	 * Returns true if a GeoIP provider is installed & working, false if otherwise.
+	 *
+	 * @return bool
+	 */
+	private static function _isGeoIPWorking()
+	{
+		$provider = Piwik_UserCountry_LocationProvider::getCurrentProvider();
+		return $provider instanceof Piwik_UserCountry_LocationProvider_GeoIp
+			&& $provider->isAvailable() === true
+			&& $provider->isWorking() === true;
 	}
 }

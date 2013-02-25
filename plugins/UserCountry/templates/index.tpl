@@ -1,9 +1,8 @@
-
 <div id="leftcolumn">
 {postEvent name="template_leftColumnUserCountry"}
 
 <h2>{'UserCountry_Continent'|translate}</h2>
-{$dataTableContinent}
+{'UserCountry-getContinent'|renderDataTable}
 
 <div class="sparkline">
 {sparkline src=$urlSparklineCountries}
@@ -15,13 +14,13 @@
 <div id="rightcolumn">
 
 <h2>{'UserCountry_Country'|translate}</h2>
-{$dataTableCountry}
+{'UserCountry-getCountry'|renderDataTable}
 
 <h2>{'UserCountry_Region'|translate}</h2>
-{$dataTableRegion}
+{'UserCountry-getRegion'|renderDataTable}
 
 <h2>{'UserCountry_City'|translate}</h2>
-{$dataTableCity}
+{'UserCountry-getCity'|renderDataTable}
 
 </div>
 
