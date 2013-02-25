@@ -464,48 +464,6 @@ class Piwik_Goals_Controller extends Piwik_Controller
 	}
 
 	/**
-	 * Gets the 'visits to conversion' report using the requested view type.
-	 */
-	public function getVisitsUntilConversion( $fetch = false )
-	{
-		$view = Piwik_ViewDataTable::factory();
-		$view->init($this->pluginName, __FUNCTION__, 'Goals.getVisitsUntilConversion', 'getVisitsUntilConversion');
-		$view->disableSearchBox();
-		$view->disableExcludeLowPopulation();
-		$view->disableSubTableWhenShowGoals();
-		$view->disableShowAllColumns();
-		$view->setColumnsToDisplay( array('label','nb_conversions') );
-		$view->setSortedColumn('label', 'asc');
-		$view->setColumnTranslation('label', Piwik_Translate('Goals_VisitsUntilConv'));
-		$view->setColumnTranslation('nb_conversions', Piwik_Translate('Goals_ColumnConversions'));
-		$view->setLimit(count(Piwik_Goals::$visitCountRanges));
-		$view->disableOffsetInformationAndPaginationControls();
-		$view->disableShowAllViewsIcons();
-		return $this->renderView($view, $fetch);
-	}
-
-	/**
-	 * Gets the 'days to conversion' report using the requested view type.
-	 */
-	public function getDaysToConversion( $fetch = false )
-	{
-		$view = Piwik_ViewDataTable::factory();
-		$view->init($this->pluginName, __FUNCTION__, 'Goals.getDaysToConversion', 'getDaysToConversion');
-		$view->disableSearchBox();
-		$view->disableExcludeLowPopulation();
-		$view->disableSubTableWhenShowGoals();
-		$view->disableShowAllColumns();
-		$view->setColumnsToDisplay( array('label','nb_conversions') );
-		$view->setSortedColumn('label', 'asc');
-		$view->setColumnTranslation('label', Piwik_Translate('Goals_DaysToConv'));
-		$view->setColumnTranslation('nb_conversions', Piwik_Translate('Goals_ColumnConversions'));
-		$view->disableShowAllViewsIcons();
-		$view->setLimit(count(Piwik_Goals::$daysToConvRanges));
-		$view->disableOffsetInformationAndPaginationControls();
-		return $this->renderView($view, $fetch);
-	}
-	
-	/**
 	 * Utility function that returns HTML that displays Goal information for reports. This
 	 * is the HTML that is at the bottom of every goals page.
 	 * 
@@ -558,8 +516,12 @@ class Piwik_Goals_Controller extends Piwik_Controller
 				$categoryText = Piwik_Translate('Goals_ViewGoalsBy', $category);
 				foreach ($reports as $report)
 				{
-					$goalReportsByDimension->addReport(
-						$categoryText, $report['name'], $report['module'].'.'.$report['action'], $customParams);
+					if (Piwik_DataTableList::getInstance()->isDefined($report['module'].'-'.$report['action'])) {
+						$goalReportsByDimension->addDataTableReport($categoryText, $report['name'], $report['module'].'-'.$report['action'], $customParams);
+					} else {
+						$goalReportsByDimension->addReport(
+							$categoryText, $report['name'], $report['module'].'.'.$report['action'], $customParams);
+					}
 				}
 			}
 		}

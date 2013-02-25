@@ -82,6 +82,7 @@ class Piwik_Goals extends Piwik_Plugin
 			'API.getReportMetadata.end' => 'getReportMetadata',
 			'API.getSegmentsMetadata' => 'getSegmentsMetadata',
 			'WidgetsList.add' => 'addWidgets',
+			'DataTableList.add' => 'addDataTables',
 			'Menu.add' => 'addMenus',
 			'SitesManager.deleteSite' => 'deleteSiteGoals',
 			'Goals.getReportsWithGoalMetrics' => 'getActualReportsWithGoalMetrics',
@@ -459,6 +460,62 @@ class Piwik_Goals extends Piwik_Plugin
         		Piwik_AddWidget('Goals_Goals', Piwik_Common::sanitizeInputValue($goal['name']), 'Goals', 'widgetGoalReport', array('idGoal' => $goal['idgoal']));
 			}
 		}
+	}
+
+	public function addDataTables()
+	{
+		Piwik_DataTableList::getInstance()->add('Goals-getVisitsUntilConversion', array(
+			'apiMethod'                    => 'Goals.getVisitsUntilConversion',
+			'disableSearch'                => true,
+			'disableExcludeLowPopulation'  => true,
+			'disableSubTableWhenShowGoals' => true,
+			'disableShowAllColumns'        => true,
+			'disableShowAllViewsIcons'     => true,
+			'disableOffsetInformation'     => true,
+			'disablePaginationControl'     => true,
+			'columnsToDisplay'             => 'label,nb_conversions',
+			'columnsToTranslate'           => array(
+				'label'          => 'Goals_VisitsUntilConv',
+				'nb_conversions' => 'Goals_ColumnConversions',
+			),
+			'defaultSort'                  => 'label',
+			'defaultSortOrder'             => 'asc',
+			'limit'                        => count(Piwik_Goals::$visitCountRanges),
+			'subTable'                     => array(
+				'apiMethod'        => 'Goals.getVisitsUntilConversion',
+				'columnsToDisplay' => 'label,nb_conversions',
+				'defaultSort'      => 'label',
+				'defaultSortOrder' => 'asc',
+				'disableSearch'    => true,
+			),
+		), 'Goals_Goals');
+
+		Piwik_DataTableList::getInstance()->add('Goals-getDaysToConversion', array(
+			'apiMethod'                    => 'Goals.getDaysToConversion',
+			'disableSearch'                => true,
+			'disableExcludeLowPopulation'  => true,
+			'disableSubTableWhenShowGoals' => true,
+			'disableShowAllColumns'        => true,
+			'disableShowAllViewsIcons'     => true,
+			'disableOffsetInformation'     => true,
+			'disablePaginationControl'     => true,
+			'columnsToDisplay'             => 'label,nb_conversions',
+			'columnsToTranslate'           => array(
+				'label'          => 'Goals_DaysToConv',
+				'nb_conversions' => 'Goals_ColumnConversions',
+			),
+			'defaultSort'                  => 'label',
+			'defaultSortOrder'             => 'asc',
+			'limit'                        => count(Piwik_Goals::$daysToConvRanges),
+			'subTable'                     => array(
+				'apiMethod'        => 'Goals.getDaysToConversion',
+				'columnsToDisplay' => 'label,nb_conversions',
+				'defaultSort'      => 'label',
+				'defaultSortOrder' => 'asc',
+				'disableSearch'    => true,
+			),
+		), 'Goals_Goals');
+
 	}
 	
 	protected function getGoalCategoryName($idSite)
