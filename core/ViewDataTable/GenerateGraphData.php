@@ -58,7 +58,7 @@ abstract class Piwik_ViewDataTable_GenerateGraphData extends Piwik_ViewDataTable
 	}
 	
 	/**
-	 * Returns numbers of elemnts to display in the graph
+	 * Returns numbers of elements to display in the graph
 	 *
 	 * @return int
 	 */
@@ -90,7 +90,7 @@ abstract class Piwik_ViewDataTable_GenerateGraphData extends Piwik_ViewDataTable
 	{
 		// the array contains values if enableShowGoals() has been used
 		// add $columnsNames to the beginning of the array
-		$this->selectableColumns = array_merge($columnsNames, $this->selectableColumns);
+		$this->selectableColumns = $columnsNames;
 	}
 	
 	/**
@@ -103,10 +103,7 @@ abstract class Piwik_ViewDataTable_GenerateGraphData extends Piwik_ViewDataTable
 		parent::enableShowGoals();
 		
 		$goalMetrics = array('nb_conversions', 'revenue');
-		$this->selectableColumns = array_merge($this->selectableColumns, $goalMetrics);
-		
-		$this->setColumnTranslation('nb_conversions', Piwik_Translate('Goals_ColumnConversions'));
-		$this->setColumnTranslation('revenue', Piwik_Translate('General_TotalRevenue'));
+		$this->selectableColumns = array_unique(array_merge($this->selectableColumns, $goalMetrics));
 	}
 
 	/**

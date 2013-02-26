@@ -409,6 +409,13 @@ class Piwik_CoreHome_Controller extends Piwik_Controller
             $view->disableSearchBox();
         }
 
+        $addTotalRow = Piwik_Common::getRequestVar('addTotalRow', false, null, $defaultParameters);
+
+        if ($addTotalRow === true) {
+
+            $view->addTotalRow();
+        }
+
         if (!empty($defaultParameters['footerMessage'])) {
 
             $view->setFooterMessage($defaultParameters['footerMessage']);

@@ -361,6 +361,8 @@ abstract class Piwik_Controller
 	 * @param string  $action            Method name of the controller to call in the img src
 	 * @param array   $customParameters  Array of name => value of parameters to set in the generated GET url
 	 * @return string The generated URL
+	 *
+	 * @deprecated since 1.11
 	 */
 	protected function getUrlSparkline( $action, $customParameters = array() )
 	{
