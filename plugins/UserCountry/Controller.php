@@ -22,8 +22,6 @@ class Piwik_UserCountry_Controller extends Piwik_Controller_Admin
 		$view->urlSparklineCountries = $this->getUrlSparklineForDataTable('UserCountry-getNumberOfDistinctCountries');
 		$view->numberDistinctCountries = $this->getNumberOfDistinctCountries(true);
 		
-		$view->visitorMap = Piwik_FrontController::getInstance()->fetchDispatch('UserCountryMap', 'visitorMap');
-
 		echo $view->render();
 	}
 	
