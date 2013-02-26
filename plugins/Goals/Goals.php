@@ -516,7 +516,83 @@ class Piwik_Goals extends Piwik_Plugin
 			),
 		), 'Goals_Goals');
 
+		Piwik_DataTableList::getInstance()->add('Goals-getEvolutionGraph', array(
+			'apiMethod'          => 'Goals.get',
+			'viewDataTable'      => 'graphEvolution',
+			'customFilter'       => array('Piwik_Goals', 'setEvolutionGraphParameters')
+		), 'Goals_Goals');
+
 	}
+
+	protected static $goalColumnNameToLabel = array(
+		'avg_order_revenue' => 'General_AverageOrderValue',
+		'nb_conversions' => 'Goals_ColumnConversions',
+		'conversion_rate'=> 'General_ColumnConversionRate',
+		'revenue' => 'General_TotalRevenue',
+		'items' => 'General_PurchasedProducts',
+	);
+
+	public function setEvolutionGraphParameters($view)
+	{
+		$idSite = Piwik_Common::getRequestVar('idSite', null, 'int');
+		$site   = new Piwik_Site($idSite);
+		$goals = Piwik_Goals_API::getInstance()->getGoals($idSite);
+
+		$columns = Piwik_Common::getRequestVar('columns', array());
+		$columns = Piwik::getArrayFromApiParameter($columns);
+
+		$columns = !is_array($columns) ? array($columns) : $columns;
+
+		$idGoal = Piwik_Common::getRequestVar('idGoal', false, 'string');
+		$view->setParametersToModify(array('idGoal' => $idGoal));
+
+		$nameToLabel = self::$goalColumnNameToLabel;
+		if($idGoal == Piwik_Archive::LABEL_ECOMMERCE_ORDER)
+		{
+			$nameToLabel['nb_conversions'] = 'General_EcommerceOrders';
+		}
+		elseif($idGoal == Piwik_Archive::LABEL_ECOMMERCE_CART)
+		{
+			$nameToLabel['nb_conversions'] = Piwik_Translate('General_VisitsWith', Piwik_Translate('Goals_AbandonedCart'));
+			$nameToLabel['conversion_rate'] = $nameToLabel['nb_conversions'];
+			$nameToLabel['revenue'] = Piwik_Translate('Goals_LeftInCart', Piwik_Translate('Goals_ColumnRevenue'));
+			$nameToLabel['items'] = Piwik_Translate('Goals_LeftInCart', Piwik_Translate('Goals_Products'));
+		}
+
+		$selectableColumns = array('nb_conversions', 'conversion_rate', 'revenue');
+		if ($site->isEcommerceEnabled())
+		{
+			$selectableColumns[] = 'items';
+			$selectableColumns[] = 'avg_order_revenue';
+		}
+
+		foreach(array_merge($columns, $selectableColumns) as $columnName)
+		{
+			$columnTranslation = '';
+			// find the right translation for this column, eg. find 'revenue' if column is Goal_1_revenue
+			foreach($nameToLabel as $metric => $metricTranslation)
+			{
+				if(strpos($columnName, $metric) !== false)
+				{
+					$columnTranslation = Piwik_Translate($metricTranslation);
+					break;
+				}
+			}
+
+			if(!empty($idGoal) && isset($goals[$idGoal]))
+			{
+				$goalName = $goals[$idGoal]['name'];
+				$columnTranslation = "$columnTranslation (".Piwik_Translate('Goals_GoalX', "$goalName").")";
+			}
+			$view->setColumnTranslation($columnName, $columnTranslation);
+		}
+		$view->setColumnsToDisplay($columns);
+		$view->setSelectableColumns($selectableColumns);
+
+		$langString = $idGoal ? 'Goals_SingleGoalOverviewDocumentation' : 'Goals_GoalsOverviewDocumentation';
+		$view->setReportDocumentation(Piwik_Translate($langString, '<br />'));
+	}
+
 	
 	protected function getGoalCategoryName($idSite)
 	{

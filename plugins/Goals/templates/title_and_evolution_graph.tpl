@@ -3,7 +3,7 @@
 {if $displayFullReport}
 	<h2>{if isset($goalName)}{'Goals_GoalX'|translate:$goalName}{else}{'Goals_GoalsOverview'|translate}{/if}</h2>
 {/if}
-{$graphEvolution}
+{'Goals-getEvolutionGraph'|renderDataTable}
 
 <div id='leftcolumn' {if !$isWidget}style='width:33%'{/if}>
 	<div class="sparkline">{sparkline src=$urlSparklineConversions}

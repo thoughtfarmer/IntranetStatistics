@@ -23,14 +23,6 @@ class Piwik_Goals_Controller extends Piwik_Controller
 	 */
 	const COUNT_TOP_ROWS_TO_DISPLAY = 3;
 	
-	protected $goalColumnNameToLabel = array(
-		'avg_order_revenue' => 'General_AverageOrderValue',
-		'nb_conversions' => 'Goals_ColumnConversions',
-		'conversion_rate'=> 'General_ColumnConversionRate',
-		'revenue' => 'General_TotalRevenue',
-		'items' => 'General_PurchasedProducts',
-	);
-	
 	private function formatConversionRate($conversionRate)
 	{
 		return sprintf('%.' . self::CONVERSION_RATE_PRECISION . 'f%%', $conversionRate);
@@ -233,13 +225,12 @@ class Piwik_Goals_Controller extends Piwik_Controller
 		$view = Piwik_View::factory('overview');
 		$this->setGeneralVariablesView($view);
 		
-		$view->graphEvolution = $this->getEvolutionGraph(true, array('nb_conversions'));
 		$view->nameGraphEvolution = 'GoalsgetEvolutionGraph';
 
 		// sparkline for the historical data of the above values
-		$view->urlSparklineConversions		= $this->getUrlSparkline('getEvolutionGraph', array('columns' => array('nb_conversions'), 'idGoal' => ''));
-		$view->urlSparklineConversionRate 	= $this->getUrlSparkline('getEvolutionGraph', array('columns' => array('conversion_rate'), 'idGoal' => ''));
-		$view->urlSparklineRevenue 			= $this->getUrlSparkline('getEvolutionGraph', array('columns' => array('revenue'), 'idGoal' => ''));
+		$view->urlSparklineConversions		= $this->getUrlSparklineForDataTable('Goals-getEvolutionGraph', array('columns' => array('nb_conversions')));
+		$view->urlSparklineConversionRate 	= $this->getUrlSparklineForDataTable('Goals-getEvolutionGraph', array('columns' => array('conversion_rate')));
+		$view->urlSparklineRevenue 			= $this->getUrlSparklineForDataTable('Goals-getEvolutionGraph', array('columns' => array('revenue')));
 
 		// Pass empty idGoal will return Goal overview
 		$request = new Piwik_API_Request("method=Goals.get&format=original&idGoal=");
@@ -292,73 +283,6 @@ class Piwik_Goals_Controller extends Piwik_Controller
 		echo $view->render();
 	}
 
-	public function getEvolutionGraph( $fetch = false, $columns = false, $idGoal = false)
-	{
-		if(empty($columns))
-		{
-			$columns = Piwik_Common::getRequestVar('columns');
-			$columns = Piwik::getArrayFromApiParameter($columns);
-		}
-
-		$columns = !is_array($columns) ? array($columns) : $columns;
-
-		if(empty($idGoal))
-		{
-			$idGoal = Piwik_Common::getRequestVar('idGoal', false, 'string');
-		}
-		$view = $this->getLastUnitGraph($this->pluginName, __FUNCTION__, 'Goals.get');
-		$view->setParametersToModify(array('idGoal' => $idGoal));
-	
-		$nameToLabel = $this->goalColumnNameToLabel;
-		if($idGoal == Piwik_Archive::LABEL_ECOMMERCE_ORDER)
-		{
-			$nameToLabel['nb_conversions'] = 'General_EcommerceOrders';
-		}
-		elseif($idGoal == Piwik_Archive::LABEL_ECOMMERCE_CART)
-		{
-			$nameToLabel['nb_conversions'] = Piwik_Translate('General_VisitsWith', Piwik_Translate('Goals_AbandonedCart'));
-			$nameToLabel['conversion_rate'] = $nameToLabel['nb_conversions'];
-			$nameToLabel['revenue'] = Piwik_Translate('Goals_LeftInCart', Piwik_Translate('Goals_ColumnRevenue'));
-			$nameToLabel['items'] = Piwik_Translate('Goals_LeftInCart', Piwik_Translate('Goals_Products'));
-		}
-		
-		$selectableColumns = array('nb_conversions', 'conversion_rate', 'revenue');
-		if ($this->site->isEcommerceEnabled())
-		{
-			$selectableColumns[] = 'items';
-			$selectableColumns[] = 'avg_order_revenue';
-		}
-		
-		foreach(array_merge($columns, $selectableColumns) as $columnName)
-		{
-			$columnTranslation = '';
-			// find the right translation for this column, eg. find 'revenue' if column is Goal_1_revenue
-			foreach($nameToLabel as $metric => $metricTranslation)
-			{
-				if(strpos($columnName, $metric) !== false)
-				{
-					$columnTranslation = Piwik_Translate($metricTranslation);
-					break;
-				}
-			}
-			
-			if(!empty($idGoal) && isset($this->goals[$idGoal]))
-			{
-				$goalName = $this->goals[$idGoal]['name'];
-				$columnTranslation = "$columnTranslation (".Piwik_Translate('Goals_GoalX', "$goalName").")";
-			}
-			$view->setColumnTranslation($columnName, $columnTranslation);
-		}
-		$view->setColumnsToDisplay($columns);
-		$view->setSelectableColumns($selectableColumns);
-		
-		$langString = $idGoal ? 'Goals_SingleGoalOverviewDocumentation' : 'Goals_GoalsOverviewDocumentation';
-		$view->setReportDocumentation(Piwik_Translate($langString, '<br />'));
-		
-		return $this->renderView($view, $fetch);
-	}
-	
-	
 	protected function getTopDimensions($idGoal)
 	{
 		$columnNbConversions = 'goal_'.$idGoal.'_nb_conversions';
@@ -440,9 +364,9 @@ class Piwik_Goals_Controller extends Piwik_Controller
 				'nb_visits_converted' => (int)$nbVisitsConverted,
 				'conversion_rate'	=> $this->formatConversionRate($dataRow->getColumn('conversion_rate')),
 				'revenue'			=> $revenue ? $revenue : 0,
-				'urlSparklineConversions' 		=> $this->getUrlSparkline('getEvolutionGraph', array('columns' => array('nb_conversions'), 'idGoal' => $idGoal)),
-				'urlSparklineConversionRate' 	=> $this->getUrlSparkline('getEvolutionGraph', array('columns' => array('conversion_rate'), 'idGoal' => $idGoal)),
-				'urlSparklineRevenue' 			=> $this->getUrlSparkline('getEvolutionGraph', array('columns' => array('revenue'), 'idGoal' => $idGoal)),
+				'urlSparklineConversions' 		=> $this->getUrlSparklineForDataTable('Goals-getEvolutionGraph', array('columns' => array('nb_conversions'), 'idGoal' => $idGoal)),
+				'urlSparklineConversionRate' 	=> $this->getUrlSparklineForDataTable('Goals-getEvolutionGraph', array('columns' => array('conversion_rate'), 'idGoal' => $idGoal)),
+				'urlSparklineRevenue' 			=> $this->getUrlSparklineForDataTable('Goals-getEvolutionGraph', array('columns' => array('revenue'), 'idGoal' => $idGoal)),
 		);
 		if($idGoal == Piwik_Archive::LABEL_ECOMMERCE_ORDER)
 		{
@@ -456,8 +380,8 @@ class Piwik_Goals_Controller extends Piwik_Controller
 			
 				'items' => $items ? $items : 0,
 				'avg_order_revenue' => $aov ? $aov : 0,
-				'urlSparklinePurchasedProducts' => $this->getUrlSparkline('getEvolutionGraph', array('columns' => array('items'), 'idGoal' => $idGoal)),
-				'urlSparklineAverageOrderValue' => $this->getUrlSparkline('getEvolutionGraph', array('columns' => array('avg_order_revenue'), 'idGoal' => $idGoal)),
+				'urlSparklinePurchasedProducts' => $this->getUrlSparklineForDataTable('Goals-getEvolutionGraph', array('columns' => array('items'), 'idGoal' => $idGoal)),
+				'urlSparklineAverageOrderValue' => $this->getUrlSparklineForDataTable('Goals-getEvolutionGraph', array('columns' => array('avg_order_revenue'), 'idGoal' => $idGoal)),
 			));
 		}
 		return $return;
