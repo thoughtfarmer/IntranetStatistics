@@ -172,7 +172,7 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
         $dateTime = self::$today;
         $idSite   = self::$idSite;
 
-		$t = self::getTracker($idSite, $visitDateTime, $defaultInit = true);
+		$t = self::getTracker($idSite, $dateTime, $defaultInit = true);
 		$t->setTokenAuth(self::getTokenAuth());
 		$t->enableBulkTracking();
         for ($daysIntoPast = 30; $daysIntoPast >= 0; $daysIntoPast--)
