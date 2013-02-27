@@ -309,7 +309,7 @@ class Piwik_API_ResponseBuilder
 			$datatable->filter('ColumnDelete', array($hideColumns, $showColumns));
 		}
 
-        // apply label filter: only return a single row matching the label parameter
+        // apply label filter: only return rows matching the label parameter (more than one if more than one label)
         $label = Piwik_Common::getRequestVar('label', '', 'string', $this->request);
         if ($label !== '')
         {

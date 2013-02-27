@@ -45,7 +45,7 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 	 * @return Piwik_DataTable
 	 */
 	public function filter($label, $dataTable)
-	{
+	{echo "HUH?\n";
 		// make sure we have the right classes
 		if (!($dataTable instanceof Piwik_DataTable)
 				&& !($dataTable instanceof Piwik_DataTable_Array))
@@ -60,7 +60,7 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 			if (count($label) > 1)
 			{
 				// do a recursive search
-				$this->labelParts = $label;
+				$this->labelParts = $label;echo "HERE?\n";
 				return $this->manipulate($dataTable);
 			}
 			$label = $label[0];
@@ -68,7 +68,7 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 			// do a non-recursive search
 			$result = $dataTable->getFilteredTableFromLabel($label);
 			if ($result->getFirstRow() !== false)
-			{
+			{echo print_r($result, true);
 				return $result;
 			}
 		}

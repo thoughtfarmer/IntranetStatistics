@@ -65,20 +65,20 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
         $config['testSuffix']                      = '_referrer2';
         $referrerLabel                             = urlencode('www.referrer0.com') . '>' . urlencode('theReferrerPage1.html');
         $config['otherRequestParameters']['label'] = urlencode($referrerLabel);
-        $return[]                                  = array('API.getRowEvolution', $config);
+        //$return[]                                  = array('API.getRowEvolution', $config);
 
         // Websites, multiple labels including one hierarchical
         $config['testSuffix']                      = '_referrerMulti1';
         $referrerLabel                             = urlencode($referrerLabel) . ',' . urlencode('www.referrer2.com');
         $config['otherRequestParameters']['label'] = urlencode($referrerLabel);
-        $return[]                                  = array('API.getRowEvolution', $config);
+        //$return[]                                  = array('API.getRowEvolution', $config);
 
         // Keywords, label containing > and ,
         $config['otherRequestParameters']['apiAction'] = 'getKeywords';
         $config['testSuffix']                          = '_LabelReservedCharacters';
         $keywords                                      = urlencode(self::$keywords[0]) . ',' . urlencode(self::$keywords[1]);
         $config['otherRequestParameters']['label']     = urlencode($keywords);
-        $return[]                                      = array('API.getRowEvolution', $config);
+        //$return[]                                      = array('API.getRowEvolution', $config);
 
         // Keywords, hierarchical
         $config['otherRequestParameters']['apiAction'] = 'getSearchEngines';
@@ -88,7 +88,7 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
             . ',Google>' . urlencode(strtolower(self::$keywords[2]));
         // Test multiple labels search engines, Google should also have a 'logo' entry
         $config['otherRequestParameters']['label'] = urlencode($keywords . ",Google");
-        $return[]                                  = array('API.getRowEvolution', $config);
+        //$return[]                                  = array('API.getRowEvolution', $config);
 
         // Actions > Pages titles, standard label
         $config['testSuffix']                          = '_pageTitles';
@@ -96,13 +96,13 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
         $config['otherRequestParameters']['apiModule'] = 'Actions';
         $config['otherRequestParameters']['apiAction'] = 'getPageTitles';
         $config['otherRequestParameters']['label']     = urlencode('incredible title 0');
-        $return[]                                      = array('API.getRowEvolution', $config);
+        //$return[]                                      = array('API.getRowEvolution', $config);
 
         // Actions > Page titles, multiple labels
         $config['testSuffix']                      = '_pageTitlesMulti';
         $label                                     = urlencode('incredible title 0') . ',' . urlencode('incredible title 2');
         $config['otherRequestParameters']['label'] = urlencode($label);
-        $return[]                                  = array('API.getRowEvolution', $config);
+        //$return[]                                  = array('API.getRowEvolution', $config);
 
         // Actions > Page URLS, hierarchical label
         $config['testSuffix']                          = '_pageUrls';
@@ -111,7 +111,7 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
         $config['otherRequestParameters']['apiModule'] = 'Actions';
         $config['otherRequestParameters']['apiAction'] = 'getPageUrls';
         $config['otherRequestParameters']['label']     = urlencode('my>dir>' . urlencode('/page3?foo=bar&baz=bar'));
-        $return[]                                      = array('API.getRowEvolution', $config);
+        //$return[]                                      = array('API.getRowEvolution', $config);
 
         // Goals > Visits Until Conversion, idGoal != 0
         $config['testSuffix']                          = '_goals_visitsUntilConversion';
@@ -122,7 +122,7 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
         $config['otherRequestParameters']['apiAction'] = 'getVisitsUntilConversion';
         $config['otherRequestParameters']['label']     = urlencode('1 visit, 2 visits');
         $config['otherRequestParameters']['idGoal']    = '2';
-        $return[]                                      = array('API.getRowEvolution', $config);
+        //$return[]                                      = array('API.getRowEvolution', $config);
 
         // Goals > Visits Until Conversion, idGoal != 0, without specifying labels
         $config['testSuffix']                                   = '_goals_visitsUntilConversion_WithoutLabels';
@@ -135,7 +135,22 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
         $config['otherRequestParameters']['filter_limit']       = 2;
         $config['otherRequestParameters']['filter_sort_column'] = 'nb_conversions';
         $config['otherRequestParameters']['idGoal']             = '2';
-        $return[]                                               = array('API.getRowEvolution', $config);
+        //$return[]                                               = array('API.getRowEvolution', $config);
+        
+        // test date range where most recent date has no data (for #3465)
+        /*$return[] = array('API.getRowEvolution', array(
+        	'testSufix' => 'multipleDates_lastNoData',
+        	'periods' => 'day',
+            'idSite' => self::$idSite,
+            'date' => self::$today,
+        	'otherRequestParameters' => array(
+		    	'date' => '2010-03-01,2011-03-08',
+		    	'period' => 'year',
+		    	'apiModule' => 'Actions',
+		    	'apiAction' => 'getPageTitles',
+		    	// no label
+		    )
+        ));*/
 
         return $return;
     }
@@ -157,29 +172,35 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
         $dateTime = self::$today;
         $idSite   = self::$idSite;
 
+		$t = self::getTracker($idSite, $visitDateTime, $defaultInit = true);
+		$t->setTokenAuth(self::getTokenAuth());
+		$t->enableBulkTracking();
         for ($daysIntoPast = 30; $daysIntoPast >= 0; $daysIntoPast--)
         {
             // Visit 1: referrer website + test page views
             $visitDateTime = Piwik_Date::factory($dateTime)->subDay($daysIntoPast)->getDatetime();
-            $t             = self::getTracker($idSite, $visitDateTime, $defaultInit = true);
+            
+            $t->setNewVisitorId();
+            
             $t->setUrlReferrer('http://www.referrer' . ($daysIntoPast % 5) . '.com/theReferrerPage' . ($daysIntoPast % 2) . '.html');
             $t->setUrl('http://example.org/my/dir/page' . ($daysIntoPast % 4) . '?foo=bar&baz=bar');
             $t->setForceVisitDateTime($visitDateTime);
-            self::checkResponse($t->doTrackPageView('incredible title ' . ($daysIntoPast % 3)));
+            self::assertTrue($t->doTrackPageView('incredible title ' . ($daysIntoPast % 3)));
 
 			// Trigger goal n°1 once
-			self::checkResponse($t->doTrackGoal(1));
+			self::assertTrue($t->doTrackGoal(1));
 
 			// Trigger goal n°2 twice
-			self::checkResponse($t->doTrackGoal(2));
+			self::assertTrue($t->doTrackGoal(2));
 			$t->setForceVisitDateTime(Piwik_Date::factory($visitDateTime)->addHour(0.1)->getDatetime());
-			self::checkResponse($t->doTrackGoal(2));
+			self::assertTrue($t->doTrackGoal(2));
 
             // VISIT 2: search engine
             $t->setForceVisitDateTime(Piwik_Date::factory($visitDateTime)->addHour(3)->getDatetime());
             $t->setUrlReferrer('http://google.com/search?q=' . urlencode(self::$keywords[$daysIntoPast % 3]));
-            self::checkResponse($t->doTrackPageView('not an incredible title '));
+            self::assertTrue($t->doTrackPageView('not an incredible title '));
         }
+        self::checkResponse($t->doBulkTrack());
     }
 }
 
