@@ -102,6 +102,7 @@ class Test_Piwik_Integration_ImportLogs extends IntegrationTestCase
     {
     	self::logVisitsWithStaticResolver(self::$tokenAuth);
     	self::logVisitsWithAllEnabled(self::$tokenAuth);
+    	self::replayLogFile(self::$tokenAuth);
     }
 
 	/**
@@ -152,6 +153,22 @@ class Test_Piwik_Integration_ImportLogs extends IntegrationTestCase
 					  '--enable-http-errors' => false,
 					  '--enable-http-redirects' => false,
 					  '--enable-reverse-dns' => false);
+		
+		self::executeLogImporter($logFile, $opts);
+	}
+	
+	/**
+	 * Logs a couple visit using log entries that are tracking requests to a piwik.php file.
+	 * Adds two visits to idSite=1 and two to non-existant sites.
+	 */
+	protected static function replayLogFile( $token_auth )
+	{
+		$logFile = PIWIK_INCLUDE_PATH.'/tests/resources/fake_logs_replay.log';
+		
+		$opts = array('--token-auth' => $token_auth,
+					  '--recorders' => '4',
+					  '--recorder-max-payload-size' => '2',
+					  '--replay-tracking' => false);
 		
 		self::executeLogImporter($logFile, $opts);
 	}
