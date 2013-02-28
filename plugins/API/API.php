@@ -1368,7 +1368,7 @@ class Piwik_API_API
 	{
 		$parameters = array(
 			'method' => $apiModule.'.'.$apiAction,
-			'label' => $label,
+			'label' => rawurlencode($label),
 			'idSite' => $idSite,
 			'period' => $period,
 			'date' => $date,
@@ -1539,7 +1539,7 @@ class Piwik_API_API
 		$dataTablesPerLabel = array();
 		$dataTableMetadata = false;
 		foreach ($labels as $labelIndex => $label)
-		{
+		{;
 			$dataTable = $this->loadRowEvolutionDataFromAPI($idSite, $period, $date, $apiModule, $apiAction, $label, $segment, $idGoal);
 
 			$dataTablesPerLabel[$labelIndex] = $dataTable->getArray();

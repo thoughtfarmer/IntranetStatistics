@@ -58,7 +58,7 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
                 'expanded'  => 0
             )
         );
-
+// TODO: make sure it works w/ urlencode?
         $return[] = array('API.getRowEvolution', $config);
 
         // Websites, hierarchical
@@ -69,25 +69,25 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
 
         // Websites, multiple labels including one hierarchical
         $config['testSuffix']                      = '_referrerMulti1';
-        $referrerLabel                             = urlencode($referrerLabel) . ',' . urlencode('www.referrer2.com');
+        $referrerLabel                             = $referrerLabel . ',' . urlencode('www.referrer2.com');
         $config['otherRequestParameters']['label'] = urlencode($referrerLabel);
         $return[]                                  = array('API.getRowEvolution', $config);
 
         // Keywords, label containing > and ,
         $config['otherRequestParameters']['apiAction'] = 'getKeywords';
         $config['testSuffix']                          = '_LabelReservedCharacters';
-        $keywords                                      = urlencode(self::$keywords[0]) . ',' . urlencode(self::$keywords[1]);
-        $config['otherRequestParameters']['label']     = urlencode($keywords);
+        $keywords                                      = rawurlencode(self::$keywords[0]) . ',' . rawurlencode(self::$keywords[1]);
+        $config['otherRequestParameters']['label']     = rawurlencode($keywords);
         $return[]                                      = array('API.getRowEvolution', $config);
 
         // Keywords, hierarchical
         $config['otherRequestParameters']['apiAction'] = 'getSearchEngines';
         $config['testSuffix']                          = '_LabelReservedCharactersHierarchical';
-        $keywords                                      = "Google>" . urlencode(strtolower(self::$keywords[0]))
-            . ',Google>' . urlencode(strtolower(self::$keywords[1]))
-            . ',Google>' . urlencode(strtolower(self::$keywords[2]));
+        $keywords                                      = "Google>" . rawurlencode(strtolower(self::$keywords[0]))
+            . ',Google>' . rawurlencode(strtolower(self::$keywords[1]))
+            . ',Google>' . rawurlencode(strtolower(self::$keywords[2]));
         // Test multiple labels search engines, Google should also have a 'logo' entry
-        $config['otherRequestParameters']['label'] = urlencode($keywords . ",Google");
+        $config['otherRequestParameters']['label'] = rawurlencode($keywords . ",Google");
         $return[]                                  = array('API.getRowEvolution', $config);
 
         // Actions > Pages titles, standard label
