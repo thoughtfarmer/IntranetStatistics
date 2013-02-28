@@ -40,39 +40,61 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 	 * for the recursive search. If the label is not recursive, these parameters
 	 * are not needed.
 	 *
-	 * @param string           $label      the label to search for
+	 * @param string           $labels      the labels to search for
 	 * @param Piwik_DataTable  $dataTable  the data table to be filtered
 	 * @return Piwik_DataTable
 	 */
-	public function filter($label, $dataTable)
-	{echo "HUH?\n";
-		// make sure we have the right classes
-		if (!($dataTable instanceof Piwik_DataTable)
-				&& !($dataTable instanceof Piwik_DataTable_Array))
+	public function filter($labels, $dataTable)
+	{
+		// TODO:
+		// 0) merge recursive/non-recursive logic? forego manipulate, write new filtering function that recurses IF label array is > 1
+		if ($dataTable instanceof Piwik_DataTable_Array)
+		{
+			$result = new Piwik_DataTable_Array(); // TODO: get empty clone will work quite well here
+			$result->metadata = $dataTable->metadata;
+			$result->setKeyName($dataTable->getKeyName());
+			
+			foreach ($dataTable->getArray() as $tableLabel => $childTable)
+			{
+				$oldDate = $this->request['date'];// TODO: what an ugly hack!
+				$this->request['date'] = $tableLabel;
+				
+				$result->addTable($this->filter($labels, $childTable), $tableLabel);
+				
+				$this->request['date'] = $oldDate;
+			}
+			
+			return $result;
+		}
+		else if ($dataTable instanceof Piwik_DataTable)
+		{
+			$label = $labels;
+			foreach ($this->getLabelVariations($label) as $label)
+			{
+				$label = explode(self::SEPARATOR_RECURSIVE_LABEL, $label);
+				$label = array_map('urldecode', $label);
+
+				if (count($label) > 1)
+				{
+					// do a recursive search
+					$this->labelParts = $label;
+					return $this->manipulate($dataTable);
+				}
+				$label = $label[0];
+
+				// do a non-recursive search
+				$result = $dataTable->getFilteredTableFromLabel($label);
+				if ($result->getFirstRow() !== false)
+				{
+					return $result;
+				}
+			}
+			return $result;
+		}
+		else
 		{
 			return $dataTable;
 		}
-		foreach ($this->getLabelVariations($label) as $label)
-		{
-			$label = explode(self::SEPARATOR_RECURSIVE_LABEL, $label);
-			$label = array_map('urldecode', $label);
-
-			if (count($label) > 1)
-			{
-				// do a recursive search
-				$this->labelParts = $label;echo "HERE?\n";
-				return $this->manipulate($dataTable);
-			}
-			$label = $label[0];
-
-			// do a non-recursive search
-			$result = $dataTable->getFilteredTableFromLabel($label);
-			if ($result->getFirstRow() !== false)
-			{echo print_r($result, true);
-				return $result;
-			}
-		}
-		return $result;
 	}
 
 	/**
