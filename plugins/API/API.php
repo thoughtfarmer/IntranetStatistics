@@ -1234,9 +1234,12 @@ class Piwik_API_API
 			if(!count($labels)) return null;
 		}
 
+		$dataTable = $this->loadRowEvolutionDataFromAPI($idSite, $period, $date, $apiModule, $apiAction, $labels, $segment, $idGoal);
+		
 		if (count($labels) > 1)
 		{
 			$data = $this->getMultiRowEvolution(
+				$dataTable,
 				$idSite,
 				$period,
 				$date,
@@ -1254,6 +1257,7 @@ class Piwik_API_API
 		else
 		{
 			$data = $this->getSingleRowEvolution(
+				$dataTable,
 				$idSite,
 				$period,
 				$date,
@@ -1273,12 +1277,10 @@ class Piwik_API_API
 	 * Get row evolution for a single label
 	 * @return array containing  report data, metadata, label, logo
 	 */
-	private function getSingleRowEvolution($idSite, $period, $date, $apiModule, $apiAction, $label, $segment, $language=false, $idGoal = false, $labelUseAbsoluteUrl = true)
+	private function getSingleRowEvolution($dataTable, $idSite, $period, $date, $apiModule, $apiAction, $label, $segment, $language=false, $idGoal = false, $labelUseAbsoluteUrl = true)
 	{
 		$metadata = $this->getRowEvolutionMetaData($idSite, $period, $date, $apiModule, $apiAction, $language, $idGoal);
 		$metricNames = array_keys($metadata['metrics']);
-
-		$dataTable = $this->loadRowEvolutionDataFromAPI($idSite, $period, $date, $apiModule, $apiAction, $label, $segment, $idGoal);
 
 		$logo = $actualLabel = false;
 		$urlFound = false;
@@ -1530,7 +1532,7 @@ class Piwik_API_API
 	}
 
 	/** Get row evolution for a multiple labels */
-	private function getMultiRowEvolution($idSite, $period, $date, $apiModule, $apiAction, $labels, $segment, $column, $language=false, $idGoal=false, $legendAppendMetric=true, $labelUseAbsoluteUrl=true)
+	private function getMultiRowEvolution($dataTable, $idSite, $period, $date, $apiModule, $apiAction, $labels, $segment, $column, $language=false, $idGoal=false, $legendAppendMetric=true, $labelUseAbsoluteUrl=true)
 	{
 		$actualLabels = $logos = array();
 
@@ -1542,8 +1544,6 @@ class Piwik_API_API
 			$metrics = array_keys($metadata['metrics']);
 			$column = reset($metrics);
 		}
-		
-		$dataTable = $this->loadRowEvolutionDataFromAPI($idSite, $period, $date, $apiModule, $apiAction, $labels, $segment, $idGoal);
 		
 		// get the processed label and logo (if any) for every requested label (sometimes labels
 		// will be changed by the API (e.g. for the brosers report). we want to display the changed
