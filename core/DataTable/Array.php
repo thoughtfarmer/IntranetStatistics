@@ -242,9 +242,7 @@ class Piwik_DataTable_Array
 	 */
 	public function getFilteredTableFromLabel($label)
 	{
-		$newTableArray = new Piwik_DataTable_Array;
-		$newTableArray->setKeyName($this->getKeyName());
-		$newTableArray->metadata = $this->metadata;
+		$newTableArray = $this->getEmptyClone();
 
 		foreach ($this->array as $subTableLabel => $subTable)
 		{
@@ -310,9 +308,7 @@ class Piwik_DataTable_Array
 
 		if ($firstChild instanceof Piwik_DataTable_Array)
 		{
-			$result = new Piwik_DataTable_Array();
-			$result->setKeyName($firstChild->getKeyName());
-			$result->metadata = $firstChild->metadata;
+			$result = $firstChild->getEmptyClone();
 			
 			foreach ($this->array as $label => $subTableArray)
 			{
@@ -399,5 +395,16 @@ class Piwik_DataTable_Array
 			$result->addTable($childTable->mergeSubtables(), $label);
 		}
 		return $result;
+	}
+	
+	/**
+	 * TODO
+	 */
+	public function getEmptyClone()
+	{
+		$newTableArray = new Piwik_DataTable_Array;
+		$newTableArray->setKeyName($this->getKeyName());
+		$newTableArray->metadata = $this->metadata;
+		return $newTableArray;
 	}
 }

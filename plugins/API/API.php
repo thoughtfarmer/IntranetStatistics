@@ -1366,6 +1366,14 @@ class Piwik_API_API
 	 */
 	private function loadRowEvolutionDataFromAPI($idSite, $period, $date, $apiModule, $apiAction, $label = false, $segment = false, $idGoal = false)
 	{
+		if (!is_array($label))
+		{
+			$label = array($label); // TODO: review how labels get encoded/decoded (before it's not double encoded for single, so this may break the API. make sure getSingle works when not double encoded?)
+		}
+		
+		$label = array_map('rawurlencode', $label);
+		$label = implode(',', $label);
+		
 		$parameters = array(
 			'method' => $apiModule.'.'.$apiAction,
 			'label' => rawurlencode($label),
@@ -1534,86 +1542,69 @@ class Piwik_API_API
 			$metrics = array_keys($metadata['metrics']);
 			$column = reset($metrics);
 		}
-
-		// load the tables for each label
-		$dataTablesPerLabel = array();
-		$dataTableMetadata = false;
-		foreach ($labels as $labelIndex => $label)
-		{;
-			$dataTable = $this->loadRowEvolutionDataFromAPI($idSite, $period, $date, $apiModule, $apiAction, $label, $segment, $idGoal);
-
-			$dataTablesPerLabel[$labelIndex] = $dataTable->getArray();
-			if (!$dataTableMetadata)
+		
+		$dataTable = $this->loadRowEvolutionDataFromAPI($idSite, $period, $date, $apiModule, $apiAction, $labels, $segment, $idGoal);
+		
+		// get the processed label and logo (if any) for every requested label (sometimes labels
+		// will be changed by the API (e.g. for the brosers report). we want to display the changed
+		// label.)
+		$actualLabels = $logos = array();
+		foreach ($labels as $labelIdx => $label)
+		{
+			foreach ($dataTable->getArray() as $table)
 			{
-				$dataTableMetadata = $dataTable->metadata;
-			}
-
-			$urlFound = false;
-			foreach ($dataTablesPerLabel[$labelIndex] as $table)
-			{
-				if ($table->getRowsCount() > 0)
+				// find row w/ label_idx metadata == $labelIdx
+				$labelRow = false;
+				foreach ($table->getRows() as $row)
 				{
-					$firstRow = $table->getFirstRow();
-
-					// in case labels were replaced in the data table (e.g. for browsers report),
-					// display the label from the table, not the one passed as filter
-					$columnLabel = $firstRow->getColumn('label');
-
-					if (!empty($columnLabel))
+					if ($row->getMetadata('label_idx') == $labelIdx)
 					{
-						$actualLabels[$labelIndex] = $columnLabel;
+						$labelRow = $row;
+						break;
 					}
-
-					list($actualLabel, $urlFound) = $this->cleanUrlForLabel($firstRow, $apiModule, $apiAction, $labelUseAbsoluteUrl);
-					if($actualLabel)
-					{
-						$actualLabels[$labelIndex] = $actualLabel;
-					}
-
-					// Forward the logo path to display logos in multi rows comparison
-					$logos[$labelIndex] = $firstRow->getMetadata('logo');
+				}
+				
+				if ($labelRow)
+				{
+					$actualLabels[$labelIdx] = $this->getProcessedLabelForRowEvolution(
+						$label, $labelRow, $apiModule, $apiAction, $labelUseAbsoluteUrl);
+					
+					$logos[$labelIdx] = $labelRow->getMetadata('logo');
+					
 					break;
 				}
 			}
-
-			if (!$urlFound)
+			
+			if (!isset($actualLabels[$labelIdx]))
 			{
-				$actualLabels[$labelIndex] = str_replace(Piwik_API_DataTableManipulator_LabelFilter::SEPARATOR_RECURSIVE_LABEL, ' - ', $label);
+				$actualLabels[$labelIdx] = $this->cleanOriginalLabel($label);
 			}
 		}
-
-		// combine the tables
-		$dataTableMulti = new Piwik_DataTable_Array;
-		$dataTableMulti->setKeyName($dataTable->getKeyName());
-		$dataTableMulti->metadata = $dataTableMetadata;
-
-		foreach (array_keys(reset($dataTablesPerLabel)) as $dateLabel)
+		
+		// convert rows to be array($column.'_'.$labelIdx => $value) as opposed to
+		// array('label' => $label, 'column' => $value).
+		$dataTableMulti = $dataTable->getEmptyClone();
+		foreach ($dataTable->getArray() as $tableLabel => $table)
 		{
-			$newRow = new Piwik_DataTable_Row;
-			foreach ($dataTablesPerLabel as $labelIndex => $tableArray)
+			$newRow = new Piwik_DataTable_Row();
+			
+			foreach ($table->getRows() as $row)
 			{
-				$table = $tableArray[$dateLabel];
-				if ($table->getRowsCount() == 0)
+				$value = $row->getColumn($column);
+				$value = floatVal(str_replace(',', '.', $value));
+				if ($value == '')
 				{
 					$value = 0;
 				}
-				else
-				{
-					$value = $table->getFirstRow()->getColumn($column);
-					$value = floatVal(str_replace(',', '.', $value));
-					if ($value == '')
-					{
-						$value = 0;
-					}
-				}
-				// keep metric in the label so that unit (%, s, ...) can be guessed correctly
-				$label = $column.'_'.$labelIndex;
-				$newRow->addColumn($label, $value);
+				
+				$newLabel = $column.'_'.$row->getMetadata('label_idx');
+				
+				$newRow->addColumn($newLabel, $value);
 			}
-
-			$newTable = new Piwik_DataTable;
+			
+			$newTable = new Piwik_DataTable();
 			$newTable->addRow($newRow);
-			$dataTableMulti->addTable($newTable, $dateLabel);
+			$dataTableMulti->addTable($newTable, $tableLabel);
 		}
 
 		// the available metrics for the report are returned as metadata / columns
@@ -1622,8 +1613,8 @@ class Piwik_API_API
 		// metadata / metrics should document the rows that are compared
 		// this way, UI code can be reused
 		$metadata['metrics'] = array();
-		foreach ($actualLabels as $labelIndex => $label) {
-
+		foreach ($actualLabels as $labelIndex => $label)
+		{
 			if($legendAppendMetric)
 			{
 				$label .= ' ('.$metadata['columns'][$column].')';
@@ -1631,7 +1622,8 @@ class Piwik_API_API
 			$metricName = $column.'_'.$labelIndex;
 			$metadata['metrics'][$metricName] = Piwik_DataTable_Filter_SafeDecodeLabel::safeDecodeLabel($label);
 
-			if(!empty($logos[$labelIndex])) {
+			if(!empty($logos[$labelIndex]))
+			{
 				$metadata['logos'][$metricName] = $logos[$labelIndex];
 			}
 		}
@@ -1643,6 +1635,36 @@ class Piwik_API_API
 			'reportData' => $dataTableMulti,
 			'metadata' => $metadata
 		);
+	}
+	
+	/**
+	 * TODO docs + move?
+	 */
+	private function getProcessedLabelForRowEvolution( $originalLabel, $row, $apiModule, $apiAction,
+														 $labelUseAbsoluteUrl )
+	{
+		$label = $row->getColumn('label'); // TODO: logic below copied from getMultiRowEvolution... but looks very strange...
+		
+		list($actualLabel, $urlFound) = $this->cleanUrlForLabel($row, $apiModule, $apiAction, $labelUseAbsoluteUrl);
+		if (!$actualLabel)
+		{
+			$actualLabel = $label;
+		}
+		
+		if (!$urlFound)
+		{
+			$actualLabel = $this->cleanOriginalLabel($originalLabel);
+		}
+		
+		return $actualLabel;
+	}
+	
+	/**
+	 * TODO
+	 */
+	private function cleanOriginalLabel( $label )
+	{
+		return str_replace(Piwik_API_DataTableManipulator_LabelFilter::SEPARATOR_RECURSIVE_LABEL, ' - ', $label);
 	}
 
 	/**

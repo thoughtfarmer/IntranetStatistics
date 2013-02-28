@@ -46,17 +46,12 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 	 */
 	public function filter($labels, $dataTable)
 	{
-		// TODO:
-		// 0) merge recursive/non-recursive logic? forego manipulate, write new filtering function that recurses IF label array is > 1
 		if ($dataTable instanceof Piwik_DataTable_Array)
 		{
-			$result = new Piwik_DataTable_Array(); // TODO: get empty clone will work quite well here
-			$result->metadata = $dataTable->metadata;
-			$result->setKeyName($dataTable->getKeyName());
-			
+			$result = $dataTable->getEmptyClone();
 			foreach ($dataTable->getArray() as $tableLabel => $childTable)
 			{
-				$oldDate = $this->request['date'];// TODO: what an ugly hack!
+				$oldDate = $this->request['date'];// TODO: what an ugly hack! (use table level metadata not table_array metadata)
 				$this->request['date'] = $tableLabel;
 				
 				$result->addTable($this->filter($labels, $childTable), $tableLabel);
@@ -68,73 +63,32 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 		}
 		else if ($dataTable instanceof Piwik_DataTable)
 		{
-			$label = $labels;//Piwik_Common::sanitizeInputValue($labels);
-			//foreach ($this->getLabelVariations($label) as $label)
-			//{
+			if (!is_array($labels))
+			{
+				$labels = explode(',', $labels);
+				$labels = array_map('urldecode', $labels);
+			}
+			
+			$result = $dataTable->getEmptyClone();
+			
+			foreach ($labels as $labelIdx => $label)
+			{
 				$label = explode(self::SEPARATOR_RECURSIVE_LABEL, $label);
 				$label = array_map('urldecode', $label);
 				
 				$row = $this->doFilterRecursiveDescend($label, $dataTable);
-				
-				$result = $dataTable->getEmptyClone();
 				if ($row)
 				{
+					$row->addMetadata('label_idx', $labelIdx);
 					$result->addRow($row);
 				}
-				return $result;
-
-				/*if (count($label) > 1)
-				{
-					// do a recursive search
-					$this->labelParts = $label;
-					return $this->manipulate($dataTable);
-				}
-				$label = $label[0];
-
-				// do a non-recursive search
-				$result = $dataTable->getFilteredTableFromLabel($label);
-				if ($result->getFirstRow() !== false)
-				{
-					return $result;
-				}*/
-			//}
+			}
 			return $result;
 		}
 		else
 		{
 			return $dataTable;
 		}
-	}
-	
-	/**
-	 * TODO
-	 */
-	protected function filterLabelPath( $dataTable, $labelPath )
-	{
-		$label = array_shift($labelPath);
-		
-		$row = false;
-		foreach ($this->getLabelVariations($label) as $labelVar)
-		{
-			$row = $dataTable->getRowFromLabel($labelVar);
-		}
-		
-		if ($row)
-		{
-			if (empty($labelPath))
-			{
-				return $row;
-			}
-			
-			$subTable = $this->loadSubtable($row, $date);
-			if ($subTable === null)
-			{
-				return false;
-			}
-			
-			return $this->filterLabelPath($subTable, $labelPath);
-		}
-		return false;
 	}
 
 	/**
@@ -166,7 +120,6 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 	 */
 	private function doFilterRecursiveDescend($labelParts, $dataTable, $date=false)
 	{
-		
 		// search for the first part of the tree search
         $labelPart = array_shift($labelParts);
 		

@@ -76,18 +76,18 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
         // Keywords, label containing > and ,
         $config['otherRequestParameters']['apiAction'] = 'getKeywords';
         $config['testSuffix']                          = '_LabelReservedCharacters';
-        $keywords                                      = rawurlencode(self::$keywords[0]) . ',' . rawurlencode(self::$keywords[1]);
-        $config['otherRequestParameters']['label']     = rawurlencode($keywords);
+        $keywords                                      = urlencode(self::$keywords[0]) . ',' . urlencode(self::$keywords[1]);
+        $config['otherRequestParameters']['label']     = urlencode($keywords);
         $return[]                                      = array('API.getRowEvolution', $config);
 
         // Keywords, hierarchical
         $config['otherRequestParameters']['apiAction'] = 'getSearchEngines';
         $config['testSuffix']                          = '_LabelReservedCharactersHierarchical';
-        $keywords                                      = "Google>" . rawurlencode(strtolower(self::$keywords[0]))
-            . ',Google>' . rawurlencode(strtolower(self::$keywords[1]))
-            . ',Google>' . rawurlencode(strtolower(self::$keywords[2]));
+        $keywords                                      = "Google>" . urlencode(strtolower(self::$keywords[0]))
+            . ',Google>' . urlencode(strtolower(self::$keywords[1]))
+            . ',Google>' . urlencode(strtolower(self::$keywords[2]));
         // Test multiple labels search engines, Google should also have a 'logo' entry
-        $config['otherRequestParameters']['label'] = rawurlencode($keywords . ",Google");
+        $config['otherRequestParameters']['label'] = urlencode($keywords . ",Google");
         $return[]                                  = array('API.getRowEvolution', $config);
 
         // Actions > Pages titles, standard label
