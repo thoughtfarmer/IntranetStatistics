@@ -138,7 +138,7 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
         $return[]                                               = array('API.getRowEvolution', $config);
         
         // test date range where most recent date has no data (for #3465)
-        /*$return[] = array('API.getRowEvolution', array(
+        $return[] = array('API.getRowEvolution', array(
         	'testSufix' => 'multipleDates_lastNoData',
         	'periods' => 'day',
             'idSite' => self::$idSite,
@@ -150,7 +150,7 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
 		    	'apiAction' => 'getPageTitles',
 		    	// no label
 		    )
-        ));*/
+        ));
 
         return $return;
     }
