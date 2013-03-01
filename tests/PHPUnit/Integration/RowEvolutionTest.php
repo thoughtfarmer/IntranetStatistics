@@ -144,7 +144,7 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
             'idSite' => self::$idSite,
             'date' => self::$today,
         	'otherRequestParameters' => array(
-		    	'date' => '2010-03-01,2010-04-08',
+		    	'date' => '2010-02-01,2010-04-08',
 		    	'period' => 'month',
 		    	'apiModule' => 'Referers',
 		    	'apiAction' => 'getKeywords',
