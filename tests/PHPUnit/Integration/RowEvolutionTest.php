@@ -58,7 +58,7 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
                 'expanded'  => 0
             )
         );
-// TODO: make sure it works w/ urlencode?
+
         $return[] = array('API.getRowEvolution', $config);
 
         // Websites, hierarchical
@@ -140,14 +140,14 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
         // test date range where most recent date has no data (for #3465)
         $return[] = array('API.getRowEvolution', array(
         	'testSufix' => 'multipleDates_lastNoData',
-        	'periods' => 'day',
+        	'periods' => 'month',
             'idSite' => self::$idSite,
             'date' => self::$today,
         	'otherRequestParameters' => array(
-		    	'date' => '2010-03-01,2011-03-08',
-		    	'period' => 'year',
-		    	'apiModule' => 'Actions',
-		    	'apiAction' => 'getPageTitles',
+		    	'date' => '2010-03-01,2010-04-08',
+		    	'period' => 'month',
+		    	'apiModule' => 'Referers',
+		    	'apiAction' => 'getKeywords',
 		    	// no label
 		    )
         ));

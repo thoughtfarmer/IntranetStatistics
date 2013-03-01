@@ -1213,28 +1213,31 @@ class Piwik_API_API
 		}
 		else
 		{
-			$range = new Piwik_Period_Range($period, $date);
-			$lastDate = $range->getDateEnd();
-
-			// retrieve top labels for the most recent period
-			$mostRecentDataTable = $this->loadRowEvolutionDataFromAPI(
-				$idSite,
-				$period,
-				$lastDate,
-				$apiModule,
-				$apiAction,
-				null,
-				$segment,
-				$idGoal
-			);
-
-			$labels = $mostRecentDataTable->getColumn('label');
-
-			//@review $labelCount can be equal to 0, this means there are no data what should this API return in that case?
-			if(!count($labels)) return null;
+			$labels = array();
 		}
-
+		
 		$dataTable = $this->loadRowEvolutionDataFromAPI($idSite, $period, $date, $apiModule, $apiAction, $labels, $segment, $idGoal);
+
+		if (empty($labels))
+		{
+			// if no labels specified, use all possible labels as list
+			foreach ($dataTable->getArray() as $table)
+			{
+				$labels = array_merge($labels, $table->getColumn('label'));
+			}
+			$labels = array_unique($labels);
+			
+			// set the label_idx metadata of each row
+			$labelsToIdx = array_flip($labels);
+			foreach ($dataTable->getArray() as $table)
+			{
+				foreach ($table->getRows() as $row)
+				{
+					$labelIdx = $labelsToIdx[$row->getColumn('label')];
+					$row->setMetadata('label_idx', $labelIdx);
+				}
+			}
+		}
 		
 		if (count($labels) > 1)
 		{
