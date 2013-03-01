@@ -1181,7 +1181,7 @@ class Piwik
 	{
 		$totalTime = self::getDbElapsedSecs();
 		$queryCount = self::getQueryCount();
-		Piwik::log("Total queries = $queryCount (total sql time = ".round($totalTime,2)."s)");
+		Piwik::log(sprintf("Total queries = %d (total sql time = %.2fs)", $queryCount, $totalTime));
 	}
 
 	/**
@@ -1619,7 +1619,7 @@ class Piwik
 	{
 		$jsCode = file_get_contents( PIWIK_INCLUDE_PATH . "/core/Tracker/javascriptCode.tpl");
 		$jsCode = htmlentities($jsCode);
-		$piwikUrl = preg_match('~^(http|https)://(.*)$~D', $piwikUrl, $matches);
+		preg_match('~^(http|https)://(.*)$~D', $piwikUrl, $matches);
 		$piwikUrl = @$matches[2];
 		$jsCode = str_replace('{$idSite}', $idSite, $jsCode);
 		$jsCode = str_replace('{$piwikUrl}', Piwik_Common::sanitizeInputValue($piwikUrl), $jsCode);
@@ -2474,7 +2474,7 @@ class Piwik
 				$message =  $e->getMessage() . ($code ? "[$code]" : '');
 				if(!Zend_Registry::get('db')->isErrNo($e, '1148'))
 				{
-					Piwik::log("LOAD DATA INFILE failed... Error was:" . $message);
+					Piwik::log(sprintf("LOAD DATA INFILE failed... Error was: %s", $message));
 				}
 				$exceptions[] = "\n  Try #" . (count($exceptions)+1) . ': ' . $queryStart .": ". $message;
 			}
@@ -2535,8 +2535,8 @@ class Piwik
 					return true;
 				}
 			} catch(Exception $e) {
-				Piwik::log("LOAD DATA INFILE failed or not supported, falling back to normal INSERTs... Error was:" . $e->getMessage());
-				
+				Piwik::log(sprintf("LOAD DATA INFILE failed or not supported, falling back to normal INSERTs... Error was: %s", $e->getMessage()));
+
 				if ($throwException)
 				{
 					throw $e;

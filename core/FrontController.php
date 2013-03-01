@@ -122,7 +122,6 @@ class Piwik_FrontController
 			$action = $controller->getDefaultAction();
 		}
 
-//		Piwik::log("Dispatching $module / $action, parameters: ".var_export($parameters, $return = true));
 		if( !is_callable(array($controller, $action)))
 		{
             // check if a datatable would be available and render that one if possible
@@ -334,8 +333,6 @@ class Piwik_FrontController
 						
 			Piwik_ExitWithMessage($e->getMessage(), false, true);
 		}
-		
-//		Piwik::log('End FrontController->init() - Request: '. var_export($_REQUEST, true));
 	}
 	
 	protected function handleMaintenanceMode()
