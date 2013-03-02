@@ -68,7 +68,7 @@ class Piwik_Goals_Controller extends Piwik_Controller
 		$view->displayFullReport = true;
 		echo $view->render();
 	}
-	protected function getItemsView($fetch, $type, $function, $api, $abandonedCart = false)
+	protected function getItemsView($fetch, $type, $function, $api)
 	{
 		$saveGET = $_GET;
 		$label = Piwik_Translate($type);
