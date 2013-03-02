@@ -145,7 +145,7 @@ class Piwik_FrontController
 		} catch(Exception $e) {
 			$debugTrace = $e->getTraceAsString();
 			$message = Piwik_Common::sanitizeInputValue($e->getMessage());
-			Piwik_ExitWithMessage($message, Piwik::shouldLoggerLog() ? $debugTrace : '', true);
+			Piwik_ExitWithMessage($message, '' /* $debugTrace */, true);
 		}
 	}
 	
