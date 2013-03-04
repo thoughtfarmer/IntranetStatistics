@@ -398,7 +398,10 @@ class Piwik_DataTable_Array
 	}
 	
 	/**
-	 * TODO
+	 * Returns a new DataTable_Array w/o any child DataTables, but with
+	 * the same key name and metadata as this instance.
+	 * 
+	 * @return Piwik_DataTable_Array
 	 */
 	public function getEmptyClone()
 	{
