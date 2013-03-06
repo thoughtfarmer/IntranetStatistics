@@ -8,14 +8,9 @@
 
 class MockLocationProvider extends Piwik_UserCountry_LocationProvider
 {
-	private $locations = array();
+	public static $locations = array();
 	private $currentLocation = 0;
 	private $ipToLocations = array();
-	
-	public function setLocations( $locations )
-	{
-		$this->locations = $locations;
-	}
 	
 	public function getLocation( $info )
 	{
@@ -27,8 +22,8 @@ class MockLocationProvider extends Piwik_UserCountry_LocationProvider
 		}
 		else
 		{
-			$result = $this->locations[$this->currentLocation];
-			$this->currentLocation = ($this->currentLocation + 1) % count($this->locations);
+			$result = self::$locations[$this->currentLocation];
+			$this->currentLocation = ($this->currentLocation + 1) % count(self::$locations);
 			
 			$this->ipToLocations[$ip] = $result;
 		}
