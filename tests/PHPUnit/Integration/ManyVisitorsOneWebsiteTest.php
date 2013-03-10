@@ -32,6 +32,8 @@ class Test_Piwik_Integration_ManyVisitorsOneWebsiteTest extends IntegrationTestC
 		'151.100.101.92', // in Rome, Italy (using country DB, so only Italy will show)
 		'103.29.196.229', // in Indonesia (Bali), (only Indonesia will show up)
 	);
+	
+	private static $ipsIndex = 0;
 
 	public static function setUpBeforeClass()
 	{
@@ -142,8 +144,8 @@ class Test_Piwik_Integration_ManyVisitorsOneWebsiteTest extends IntegrationTestC
 			$t->setNewVisitorId();
 			if ($setIp)
 			{
-				$t->setIp(current(self::$ips));
-				next(self::$ips);
+				$t->setIp(self::$ips[self::$ipsIndex]);
+				++self::$ipsIndex;
 			}
 			else
 			{
@@ -200,6 +202,17 @@ class Test_Piwik_Integration_ManyVisitorsOneWebsiteTest extends IntegrationTestC
 		Piwik_UserCountry_LocationProvider_GeoIp::$geoIPDatabaseDir = 'tests/lib/geoip-files';
 		Piwik_UserCountry_LocationProvider::$providers = null;
 		Piwik_UserCountry_LocationProvider::setCurrentProvider(self::GEOIP_IMPL_TO_TEST);
+		
+		if (Piwik_UserCountry_LocationProvider::getCurrentProviderId() !== self::GEOIP_IMPL_TO_TEST)
+		{
+			throw new Exception("Failed to set the current location provider to '".self::GEOIP_IMPL_TO_TEST."'.");
+		}
+		
+		$possibleFiles = Piwik_UserCountry_LocationProvider_GeoIp::$dbNames['loc'];
+		if (Piwik_UserCountry_LocationProvider_GeoIp::getPathToGeoIpDatabase($possibleFiles) === false)
+		{
+			throw new Exception("The GeoIP location provider cannot find the '$file' file! Tests will fail.");
+		}
 	}
 	
 	public static function setMockLocationProvider()
