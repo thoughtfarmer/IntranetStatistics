@@ -317,7 +317,7 @@ class Piwik_ImageGraph_API
 				//@review this test will need to be updated after evaluating the @review comment in API/API.php
 				if(!$processedReport)
 				{
-					throw new Exception(Piwik_Translate('General_NoDataForGraph'));
+					throw new Exception(Piwik_Translate('General_NoDataForGraph_js'));
 				}
 
 				// restoring generic filter parameters
@@ -433,12 +433,9 @@ class Piwik_ImageGraph_API
 			}
 			else // if the report has no dimension we have multiple reports each with only one row within the reportData
 			{
-				// $reportData instanceof Piwik_DataTable_Array
-				$periodsMetadata = array_values($reportData->metadata);
-
 				// $periodsData instanceof Piwik_DataTable_Simple[]
 				$periodsData = array_values($reportData->getArray());
-				$periodsCount = count($periodsMetadata);
+				$periodsCount = count($periodsData);
 
 				for ($i = 0 ; $i < $periodsCount ; $i++)
 				{
@@ -478,14 +475,14 @@ class Piwik_ImageGraph_API
 						}
 					}
 
-					$rowId = $periodsMetadata[$i]['period']->getLocalizedShortString();
+					$rowId = $periodsData[$i]->metadata['period']->getLocalizedShortString();
 					$abscissaSeries[] = Piwik_Common::unsanitizeInputValue($rowId);
 				}
 			}
 
 			if(!$hasData || !$hasNonZeroValue)
 			{
-				throw new Exception(Piwik_Translate('General_NoDataForGraph'));
+				throw new Exception(Piwik_Translate('General_NoDataForGraph_js'));
 			}
 
 			//Setup the graph

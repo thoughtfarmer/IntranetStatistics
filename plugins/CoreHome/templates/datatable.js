@@ -134,7 +134,10 @@ dataTable.prototype =
 		}
 		if (typeof callbackSuccess == "undefined") 
 		{
-			callbackSuccess = self.dataTableLoaded;
+			callbackSuccess = function (response)
+			{
+				self.dataTableLoaded(response, self.workingDivId);
+			};
 		}
 		
 		if(displayLoading)
@@ -358,7 +361,26 @@ dataTable.prototype =
 	handleSort: function(domElem)
 	{
 		var self = this;
-		if( self.param.enable_sort )
+
+    function getSortImageSrc() {
+      var imageSortSrc = false;
+      if (currentIsSubDataTable) {
+        if (self.param.filter_sort_order == 'asc') {
+          imageSortSrc = 'themes/default/images/sort_subtable_asc.png';
+        } else {
+          imageSortSrc = 'themes/default/images/sort_subtable_desc.png';
+        }
+      } else {
+        if (self.param.filter_sort_order == 'asc') {
+          imageSortSrc = 'themes/default/images/sortasc.png';
+        } else {
+          imageSortSrc = 'themes/default/images/sortdesc.png';
+        }
+      }
+      return imageSortSrc;
+    }
+
+    if( self.param.enable_sort )
 		{
 			$('.sortable', domElem).off('click.dataTableSort').on('click.dataTableSort',
 				function()
@@ -372,19 +394,14 @@ dataTable.prototype =
 			{
 				// are we in a subdatatable?
 				var currentIsSubDataTable = $(domElem).parent().hasClass('cellSubDataTable');
-				
-				var prefixSortIcon = ''; 
-				if(currentIsSubDataTable)
-				{
-					prefixSortIcon = '_subtable_';
-				}
-				var imageSortWidth = 16;
-				var imageSortHeight = 16;
+        var imageSortSrc = getSortImageSrc();
+        var imageSortWidth = 16;
+        var imageSortHeight = 16;
 				// we change the style of the column currently used as sort column
 				// adding an image and the class columnSorted to the TD
 				$(".sortable#"+self.param.filter_sort_column+' #thDIV', domElem).parent()
 					.addClass('columnSorted')
-					.prepend('<div id="sortIconContainer"><img id="sortIcon" width="'+imageSortWidth+'" height="'+imageSortHeight+'" src="themes/default/images/sort'+prefixSortIcon+ self.param.filter_sort_order+'.png" /></div>');
+					.prepend('<div id="sortIconContainer"><img id="sortIcon" width="'+imageSortWidth+'" height="'+imageSortHeight+'" src="'+ imageSortSrc +'" /></div>');
 			}
 		}
 	},
@@ -1753,8 +1770,12 @@ actionDataTable.prototype =
 		self.handleOffsetInformation(domElem);
 		if( self.workingDivId != undefined)
 		{
-			self.handleSearchBox(domElem, self.dataTableLoaded );
-			self.handleConfigurationBox(domElem, self.dataTableLoaded );
+			var dataTableLoadedProxy = function (response) {
+				self.dataTableLoaded(response, self.workingDivId);
+			};
+			
+			self.handleSearchBox(domElem, dataTableLoadedProxy);
+			self.handleConfigurationBox(domElem, dataTableLoadedProxy);
 		}
 		
 		self.handleColumnDocumentation(domElem);

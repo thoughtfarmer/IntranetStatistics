@@ -862,8 +862,6 @@ class Piwik_API_API
 			// Need a new Piwik_DataTable_Array to store the 'human readable' values
 			$newReport = new Piwik_DataTable_Array();
 			$newReport->setKeyName("prettyDate");
-			$dataTableMetadata = $dataTable->metadata;
-			$newReport->metadata = $dataTableMetadata;
 
 			// Need a new Piwik_DataTable_Array to store report metadata
 			$rowsMetadata = new Piwik_DataTable_Array();
@@ -873,8 +871,9 @@ class Piwik_API_API
 			foreach($dataTable->getArray() as $label => $simpleDataTable)
 			{
 				list($enhancedSimpleDataTable, $rowMetadata) = $this->handleSimpleDataTable($idSite, $simpleDataTable, $columns, $hasDimension, $showRawMetrics);
+				$enhancedSimpleDataTable->metadata = $simpleDataTable->metadata;
 
-				$period = $dataTableMetadata[$label]['period']->getLocalizedLongString();
+				$period = $simpleDataTable->metadata['period']->getLocalizedLongString();
 				$newReport->addTable($enhancedSimpleDataTable, $period);
 				$rowsMetadata->addTable($rowMetadata, $period);
 			}
@@ -1526,8 +1525,8 @@ class Piwik_API_API
 				continue;
 			}
 
-			$change = Piwik_DataTable_Filter_CalculateEvolutionFilter::calculate(
-				$last, $first, $quotientPrecision = 0, $addPlusSign = true);
+			$change = Piwik_DataTable_Filter_CalculateEvolutionFilter::calculate($last, $first, $quotientPrecision = 0);
+            $change = Piwik_DataTable_Filter_CalculateEvolutionFilter::prependPlusSignToNumber($change);
 			$metricsResult[$metric]['change'] = $change;
 		}
 

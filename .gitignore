@@ -1,8 +1,10 @@
+bootstrap.php
 build
 crossdomain.xml
 documentation
 favicon.ico
 logs
+plugins/*.zip
 themes/logo-header.png
 themes/logo.png
 piwik-min.js

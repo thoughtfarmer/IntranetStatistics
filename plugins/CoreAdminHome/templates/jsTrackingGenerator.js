@@ -9,7 +9,8 @@
 
 $(document).ready(function() {
 	
-	var piwikHost = window.location.host;
+	var piwikHost = window.location.host,
+		piwikPath = location.pathname.substring(0, location.pathname.lastIndexOf('/'));
 	
 	// 
 	// utility methods
@@ -228,7 +229,7 @@ $(document).ready(function() {
 		result += '  _paq.push(["trackPageView"]);\n\
   _paq.push(["enableLinkTracking"]);\n\n\
   (function() {\n\
-    var u=(("https:" == document.location.protocol) ? "https" : "http") + "://' + piwikHost + '/";\n\
+    var u=(("https:" == document.location.protocol) ? "https" : "http") + "://' + piwikHost + piwikPath + '/";\n\
     _paq.push(["setTrackerUrl", u+"piwik.php"]);\n\
     _paq.push(["setSiteId", ' + JSON.stringify(idSite) + ']);\n\
     var d=document, g=d.createElement("script"), s=d.getElementsByTagName("script")[0]; g.type="text/javascript";\n\
@@ -245,7 +246,8 @@ $(document).ready(function() {
 	{
 		// get data ( (("https:" == document.location.protocol)?"https://' + piwikHost + '":"http://' + piwikHost + '") )
 		var idSite = $('#image-tracker-website .custom_select_main_link').attr('siteid'),
-			piwikURL = ("https:" == document.location.protocol ? "https://" + piwikHost : "http://" + piwikHost) + document.location.pathname,
+			path = document.location.pathname,
+			piwikURL = ("https:" == document.location.protocol ? "https://" + piwikHost : "http://" + piwikHost) + path.substring(0, path.lastIndexOf('/')) + '/piwik.php',
 			actionName = $('#image-tracker-action-name').val(),
 			idGoal = null,
 			revenue = null;
@@ -307,7 +309,8 @@ $(document).ready(function() {
 				$(this).text(siteHost);
 			});
 			
-			$('.current-site-alias').text(siteUrls[site.id][1] || 'x.domain.com');
+			var defaultAliasUrl = 'x.' + siteHost;
+			$('.current-site-alias').text(siteUrls[site.id][1] || defaultAliasUrl);
 		
 			resetGoalSelectItems(site.id, 'js-tracker-goal');
 			generateJsCode();

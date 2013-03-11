@@ -19,15 +19,6 @@
 class Piwik_DataTable_Array
 {
 	/**
-	 * Used to store additional information about the DataTable Array.
-	 * For example if the Array is used to store multiple DataTable of UserCountry,
-	 * we can add the metadata of the 'idSite' they refer to, so we can access it later if necessary.
-	 *
-	 * @var array of mixed
-	 */
-	public $metadata = array();
-	
-	/**
 	 * Array containing the DataTable withing this Piwik_DataTable_Array
 	 *
 	 * @var Piwik_DataTable[]
@@ -219,6 +210,13 @@ class Piwik_DataTable_Array
 		}
 	}
 
+    public function deleteRow($id)
+    {
+        foreach($this->array as $table)
+        {
+            $table->deleteRow($id);
+        }
+    }
 	/**
 	 * Deletes the given column
 	 *
@@ -316,7 +314,10 @@ class Piwik_DataTable_Array
 				{
 					if (!isset($result->array[$innerLabel]))
 					{
-						$result->addTable(new Piwik_DataTable(), $innerLabel);
+						$dataTable = new Piwik_DataTable();
+						$dataTable->metadata = $subTable->metadata;
+						
+						$result->addTable($dataTable, $innerLabel);
 					}
 				
 					$this->copyRowsAndSetLabel($result->array[$innerLabel], $subTable, $label);
@@ -407,7 +408,6 @@ class Piwik_DataTable_Array
 	{
 		$newTableArray = new Piwik_DataTable_Array;
 		$newTableArray->setKeyName($this->getKeyName());
-		$newTableArray->metadata = $this->metadata;
 		return $newTableArray;
 	}
 }

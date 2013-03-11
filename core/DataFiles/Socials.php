@@ -73,6 +73,9 @@ if (!isset($GLOBALS['Piwik_socialUrl']))
 		
 		// Classmates.com
 		'classmates.com'      => 'Classmates.com',
+
+		// Github
+		'github.com'		=> 'Github',
 		
 		// Google+
 		'url.google.com'     => 'Google+',
@@ -130,9 +133,15 @@ if (!isset($GLOBALS['Piwik_socialUrl']))
 		
 		// StudiVZ
 		'studivz.net'		 => 'StudiVZ',
+
+		// StackOverflow
+		'stackoverflow.com'	=> 'StackOverflow',
 		
 		// Sonico.com
 		'sonico.com'		  => 'Sonico.com',
+
+		// Pinterest
+		'pinterest.com'		=> 'Pinterest',
 		
 		// Plaxo
 		'plaxo.com'		   => 'Plaxo',
@@ -154,6 +163,9 @@ if (!isset($GLOBALS['Piwik_socialUrl']))
 		
 		// StumbleUpon
 		'stumbleupon.com'     => 'StumbleUpon',
+
+		// Sourceforge
+		'sourceforge.net'	=> 'SourceForge',
 		
 		// Hyves
 		'hyves.nl'		    => 'Hyves',
