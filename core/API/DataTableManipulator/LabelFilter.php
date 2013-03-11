@@ -44,19 +44,17 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 	 * @param Piwik_DataTable  $dataTable  the data table to be filtered
 	 * @return Piwik_DataTable
 	 */
-	public function filter($labels, $dataTable)
+	public function filter($labels, $dataTable, $date = false)
 	{
 		if ($dataTable instanceof Piwik_DataTable_Array)
 		{
 			$result = $dataTable->getEmptyClone();
 			foreach ($dataTable->getArray() as $tableLabel => $childTable)
 			{
-				$oldDate = $this->request['date'];// TODO: what an ugly hack! (use table level metadata not table_array metadata)
-				$this->request['date'] = $tableLabel;
+				$date = $childTable->metadata['period']->getDateStart()->toString();
+				$newTable = $this->filter($labels, $childTable, $date);
 				
-				$result->addTable($this->filter($labels, $childTable), $tableLabel);
-				
-				$this->request['date'] = $oldDate;
+				$result->addTable($newTable, $tableLabel);
 			}
 			
 			return $result;
@@ -76,7 +74,7 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 				$label = explode(self::SEPARATOR_RECURSIVE_LABEL, $label);
 				$label = array_map('urldecode', $label);
 				
-				$row = $this->doFilterRecursiveDescend($label, $dataTable);
+				$row = $this->doFilterRecursiveDescend($label, $dataTable, $date);
 				if ($row)
 				{
 					$row->addMetadata('label_idx', $labelIdx);

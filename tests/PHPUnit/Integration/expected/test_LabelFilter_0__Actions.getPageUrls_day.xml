@@ -12,5 +12,6 @@
 		<bounce_rate>0%</bounce_rate>
 		<exit_rate>100%</exit_rate>
 		<url>http://example.org/0</url>
+		<label_idx>0</label_idx>
 	</row>
 </result>
