@@ -1299,7 +1299,7 @@ class Piwik_API_API
 				{
 					$logo = $row->getMetadata('logo');
 
-					list($actualLabel, $urlFound) = $this->cleanUrlForLabel($row, $apiModule, $apiAction, $labelUseAbsoluteUrl);
+					$actualLabel = $this->getRowUrlForEvolutionLabel($row, $apiModule, $apiAction, $labelUseAbsoluteUrl);
 					$urlFound = $actualLabel !== false;
 					if(empty($actualLabel))
 					{
@@ -1342,7 +1342,7 @@ class Piwik_API_API
 		return $return;
 	}
 
-	private function cleanUrlForLabel($row, $apiModule, $apiAction, $labelUseAbsoluteUrl)
+	private function getRowUrlForEvolutionLabel($row, $apiModule, $apiAction, $labelUseAbsoluteUrl)
 	{
 		if (($url = $row->getMetadata('url'))
 			&& ($apiModule == 'Actions'
@@ -1351,9 +1351,9 @@ class Piwik_API_API
 			&& $labelUseAbsoluteUrl
 		) {
 			$actualLabel = preg_replace(';^http(s)?://(www.)?;i', '', $url);
-			return array($actualLabel, true);
+			return $actualLabel;
 		}
-		return array(false, false);
+		return false;
 	}
 
 	/**
@@ -1640,20 +1640,15 @@ class Piwik_API_API
 	}
 	
 	/**
-	 * TODO docs + move?
+	 * Returns the display label for a row evolution row from the data in
+	 * a DataTable row. If the row has URL metadata, the URL is cleaned and
+	 * used as the display label. Otherwise, the original label is used.
 	 */
 	private function getProcessedLabelForRowEvolution( $originalLabel, $row, $apiModule, $apiAction,
-														 $labelUseAbsoluteUrl )
+														 $useAbsoluteUrlForUrl )
 	{
-		$label = $row->getColumn('label'); // TODO: logic below copied from getMultiRowEvolution... but looks very strange...
-		
-		list($actualLabel, $urlFound) = $this->cleanUrlForLabel($row, $apiModule, $apiAction, $labelUseAbsoluteUrl);
-		if (!$actualLabel)
-		{
-			$actualLabel = $label;
-		}
-		
-		if (!$urlFound)
+		$actualLabel = $this->getRowUrlForEvolutionLabel($row, $apiModule, $apiAction, $useAbsoluteUrlForUrl);
+		if (empty($actualLabel))
 		{
 			$actualLabel = $this->cleanOriginalLabel($originalLabel);
 		}
@@ -1662,7 +1657,8 @@ class Piwik_API_API
 	}
 	
 	/**
-	 * TODO
+	 * Returns a prettier, more comprehensible version of a row evolution label
+	 * for display.
 	 */
 	private function cleanOriginalLabel( $label )
 	{
