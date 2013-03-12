@@ -190,5 +190,14 @@ if (!isset($GLOBALS['Piwik_socialUrl']))
 		
 		//MoiKrug.ru
 		'moikrug.ru'		  => 'my.mail.ru',
+
+		// Reddit
+		'reddit.com'	=>	'reddit',
+
+		// HackerNews
+		'news.ycombinator.com'	=>	'Hacker News',
+
+		// Identi.ca
+		'identi.ca'	=> 'identi.ca',
     );
 }
