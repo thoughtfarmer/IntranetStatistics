@@ -311,8 +311,6 @@ class Piwik_API_ResponseBuilder
 
         // apply label filter: only return rows matching the label parameter (more than one if more than one label)
         $label = Piwik_Common::getRequestVar('label', '', 'string', $this->request);
-        echo "WHOLE LABEL: '$label'\n";
-        echo "IN GET: '".$this->request['label']."'\n";
         if ($label !== '')
         {
 	        //$label = Piwik_Common::unsanitizeInputValue($label);

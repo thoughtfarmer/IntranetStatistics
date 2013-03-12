@@ -73,7 +73,7 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 			{
 				$label = explode(self::SEPARATOR_RECURSIVE_LABEL, $label);
 				$label = array_map('urldecode', $label);
-				echo "LABEL: ".print_r($label, true)."\n";
+				
 				$row = $this->doFilterRecursiveDescend($label, $dataTable, $date);
 				if ($row)
 				{

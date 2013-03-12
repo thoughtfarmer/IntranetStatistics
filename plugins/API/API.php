@@ -1300,6 +1300,7 @@ class Piwik_API_API
 					$logo = $row->getMetadata('logo');
 
 					list($actualLabel, $urlFound) = $this->cleanUrlForLabel($row, $apiModule, $apiAction, $labelUseAbsoluteUrl);
+					$urlFound = $actualLabel !== false;
 					if(empty($actualLabel))
 					{
 						$actualLabel = $row->getColumn('label');
@@ -1343,7 +1344,6 @@ class Piwik_API_API
 
 	private function cleanUrlForLabel($row, $apiModule, $apiAction, $labelUseAbsoluteUrl)
 	{
-		$urlFound = $actualLabel = false;
 		if (($url = $row->getMetadata('url'))
 			&& ($apiModule == 'Actions'
 				|| ($apiModule == 'Referers'
@@ -1351,9 +1351,9 @@ class Piwik_API_API
 			&& $labelUseAbsoluteUrl
 		) {
 			$actualLabel = preg_replace(';^http(s)?://(www.)?;i', '', $url);
-			$urlFound = true;
+			return array($actualLabel, true);
 		}
-		return array($actualLabel, $urlFound);
+		return array(false, false);
 	}
 
 	/**
