@@ -63,22 +63,26 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 		{
 			if (!is_array($labels))
 			{
-				$labels = explode(',', $labels);
-				$labels = array_map('urldecode', $labels);
+				$labels = array($labels);
 			}
 			
 			$result = $dataTable->getEmptyClone();
 			
 			foreach ($labels as $labelIdx => $label)
 			{
-				$label = explode(self::SEPARATOR_RECURSIVE_LABEL, $label);
-				$label = array_map('urldecode', $label);
-				
-				$row = $this->doFilterRecursiveDescend($label, $dataTable, $date);
-				if ($row)
+				foreach ($this->getLabelVariations($label) as $labelVariation)
 				{
-					$row->addMetadata('label_idx', $labelIdx);
-					$result->addRow($row);
+					$labelVariation = explode(self::SEPARATOR_RECURSIVE_LABEL, $labelVariation);
+					$labelVariation = array_map('urldecode', $labelVariation);
+				
+					$row = $this->doFilterRecursiveDescend($labelVariation, $dataTable, $date);
+					if ($row)
+					{
+						$row->addMetadata('label_idx', $labelIdx);
+						$result->addRow($row);
+						
+						break;
+					}
 				}
 			}
 			return $result;

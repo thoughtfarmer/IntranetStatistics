@@ -1376,11 +1376,10 @@ class Piwik_API_API
 		}
 		
 		$label = array_map('rawurlencode', $label);
-		$label = implode(',', $label);
 		
 		$parameters = array(
 			'method' => $apiModule.'.'.$apiAction,
-			'label' => rawurlencode($label),
+			'label' => $label,
 			'idSite' => $idSite,
 			'period' => $period,
 			'date' => $date,
@@ -1406,6 +1405,7 @@ class Piwik_API_API
 		}
 
 		$url = Piwik_Url::getQueryStringFromParameters($parameters);
+		
         $request = new Piwik_API_Request($url);
 
 		try {
@@ -1652,7 +1652,6 @@ class Piwik_API_API
 		{
 			$actualLabel = $this->cleanOriginalLabel($originalLabel);
 		}
-		
 		return $actualLabel;
 	}
 	

@@ -309,14 +309,14 @@ class Piwik_API_ResponseBuilder
 			$datatable->filter('ColumnDelete', array($hideColumns, $showColumns));
 		}
 
-        // apply label filter: only return rows matching the label parameter (more than one if more than one label)
-        $label = Piwik_Common::getRequestVar('label', '', 'string', $this->request);
-        if ($label !== '')
-        {
-	        //$label = Piwik_Common::unsanitizeInputValue($label);
-            $filter = new Piwik_API_DataTableManipulator_LabelFilter($this->apiModule, $this->apiMethod, $this->request);
-            $datatable = $filter->filter($label, $datatable);
-        }
+		// apply label filter: only return rows matching the label parameter (more than one if more than one label)
+		$label = $this->getLabelQueryParam();
+		if (!empty($label))
+		{
+			$label = array_map(array('Piwik_Common', 'unsanitizeInputValue'), $label);
+			$filter = new Piwik_API_DataTableManipulator_LabelFilter($this->apiModule, $this->apiMethod, $this->request);
+			$datatable = $filter->filter($label, $datatable);
+		}
 		return $this->getRenderedDataTable($datatable);
 	}
 
@@ -483,5 +483,22 @@ class Piwik_API_ResponseBuilder
 			$json .= "]";
 		}
 		return $json;
+	}
+	
+	/**
+	 * TODO
+	 */
+	private function getLabelQueryParam()
+	{
+        $label = Piwik_Common::getRequestVar('label', array(), 'array', $this->request);
+        if (empty($label))
+        {
+        	$label = Piwik_Common::getRequestVar('label', '', 'string', $this->request);
+        	if (!empty($label))
+        	{
+        		$label = array($label);
+        	}
+        }
+        return $label;
 	}
 }

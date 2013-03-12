@@ -124,8 +124,8 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
         $return[]                                               = array('API.getRowEvolution', $config);
         
         // test date range where most recent date has no data (for #3465)
-        $return[] = array('API.getRowEvolution', array(
-        	'testSufix' => 'multipleDates_lastNoData',
+        $return[] = array('API.getRowEvolution', array( // TODO: remove old file
+        	'testSuffix' => '_multipleDates_lastNoData',
         	'periods' => 'month',
             'idSite' => $idSite,
             'date' => $today,
@@ -136,6 +136,22 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
 		    	'apiAction' => 'getKeywords',
 		    	// no label
 		    )
+        ));
+        
+        // test that reports that process row labels are treated correctly
+        $return[] = array('API.getRowEvolution', array(
+        	'testSuffix' => '_processedRowLabel',
+        	'periods' => 'day',
+        	'idSite' => $idSite,
+        	'date' => $today,
+        	'otherRequestParameters' => array(
+        		'date' => '2010-03-01,2010-03-06',
+        		'period' => 'month',
+        		'apiModule' => 'UserSettings',
+        		'apiAction' => 'getBrowser',
+        		'label' => 'Firefox,Chrome'
+        	)
+        	
         ));
 
         return $return;
