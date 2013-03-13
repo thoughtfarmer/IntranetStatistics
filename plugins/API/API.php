@@ -1372,9 +1372,8 @@ class Piwik_API_API
 	{
 		if (!is_array($label))
 		{
-			$label = array($label); // TODO: review how labels get encoded/decoded (before it's not double encoded for single, so this may break the API. make sure getSingle works when not double encoded?)
+			$label = array($label);
 		}
-		
 		$label = array_map('rawurlencode', $label);
 		
 		$parameters = array(

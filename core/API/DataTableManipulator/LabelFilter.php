@@ -67,7 +67,6 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 			}
 			
 			$result = $dataTable->getEmptyClone();
-			
 			foreach ($labels as $labelIdx => $label)
 			{
 				foreach ($this->getLabelVariations($label) as $labelVariation)
