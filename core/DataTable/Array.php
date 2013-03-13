@@ -389,8 +389,7 @@ class Piwik_DataTable_Array
 	 */
 	public function mergeSubtables()
 	{
-		$result = new Piwik_DataTable_Array();
-		$result->keyName = $this->keyName;
+		$result = $this->getEmptyClone();
 		foreach ($this->array as $label => $childTable)
 		{
 			$result->addTable($childTable->mergeSubtables(), $label);
@@ -400,7 +399,7 @@ class Piwik_DataTable_Array
 	
 	/**
 	 * Returns a new DataTable_Array w/o any child DataTables, but with
-	 * the same key name and metadata as this instance.
+	 * the same key name as this instance.
 	 * 
 	 * @return Piwik_DataTable_Array
 	 */

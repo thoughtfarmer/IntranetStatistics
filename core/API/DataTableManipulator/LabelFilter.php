@@ -29,7 +29,7 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 {
 	const SEPARATOR_RECURSIVE_LABEL = '>';
 	
-	private $labelParts;
+	private $labels;
 
 	/**
 	 * Filter a data table by label.
@@ -43,39 +43,15 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 	 * @param Piwik_DataTable  $dataTable  the data table to be filtered
 	 * @return Piwik_DataTable
 	 */
-	public function filter($labels, $dataTable, $date = false)
+	public function filter($labels, $dataTable)
 	{
-		if ($dataTable instanceof Piwik_DataTable_Array)
+		if (!is_array($labels))
 		{
-			return $this->filterDataTableArray($labels, $dataTable);
+			$labels = array($labels);
 		}
-		else if ($dataTable instanceof Piwik_DataTable)
-		{
-			return $this->filterDataTable($labels, $dataTable, $date);
-		}
-		else
-		{
-			return $dataTable;
-		}
-	}
-
-	/**
-	 * This method is called from parent::manipulate for each Piwik_DataTable.
-	 * It starts the recursive descend and builds a table with one or zero rows.
-	 *
-	 * @param Piwik_DataTable  $dataTable
-	 * @param bool             $date
-	 * @return Piwik_DataTable
-	 */
-	protected function doManipulate(Piwik_DataTable $dataTable, $date=false)
-	{
-		$row = $this->doFilterRecursiveDescend($this->labelParts, $dataTable, $date);
-		$newDataTable = $dataTable->getEmptyClone();
-		if ($row !== false)
-		{
-			$newDataTable->addRow($row);
-		}
-		return $newDataTable;
+		
+		$this->labels = $labels;
+		return $this->manipulate($dataTable);
 	}
 
 	/**
@@ -83,10 +59,9 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 	 *
 	 * @param array            $labelParts
 	 * @param Piwik_DataTable  $dataTable
-	 * @param bool             $date
 	 * @return Piwik_DataTable_Row|false
 	 */
-	private function doFilterRecursiveDescend($labelParts, $dataTable, $date=false)
+	private function doFilterRecursiveDescend($labelParts, $dataTable)
 	{
 		// search for the first part of the tree search
         $labelPart = array_shift($labelParts);
@@ -112,14 +87,14 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 			return $row;
 		}
 		
-		$subTable = $this->loadSubtable($row, $date);
+		$subTable = $this->loadSubtable($dataTable, $row);
 		if ($subTable === null)
 		{
 			// no more subtables but label parts left => no match found
 			return false;
 		}
 		
-		return $this->doFilterRecursiveDescend($labelParts, $subTable, $date);
+		return $this->doFilterRecursiveDescend($labelParts, $subTable);
 	}
 
 	/**
@@ -163,40 +138,19 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 	}
 	
 	/**
-	 * Filters child DataTables of a DataTable_Array. See @filter for more info.
-	 */
-	private function filterDataTableArray( $labels, $dataTable )
-	{
-		$result = $dataTable->getEmptyClone();
-		foreach ($dataTable->getArray() as $tableLabel => $childTable)
-		{
-			$date = $childTable->metadata['period']->getDateStart()->toString();
-			$newTable = $this->filter($labels, $childTable, $date);
-			
-			$result->addTable($newTable, $tableLabel);
-		}
-		return $result;
-	}
-	
-	/**
 	 * Filter a Piwik_DataTable instance. See @filter for more info.
 	 */
-	private function filterDataTable( $labels, $dataTable, $date )
+	protected function manipulateDataTable( $dataTable )
 	{
-		if (!is_array($labels))
-		{
-			$labels = array($labels);
-		}
-		
 		$result = $dataTable->getEmptyClone();
-		foreach ($labels as $labelIdx => $label)
+		foreach ($this->labels as $labelIdx => $label)
 		{
 			foreach ($this->getLabelVariations($label) as $labelVariation)
 			{
 				$labelVariation = explode(self::SEPARATOR_RECURSIVE_LABEL, $labelVariation);
 				$labelVariation = array_map('urldecode', $labelVariation);
 			
-				$row = $this->doFilterRecursiveDescend($labelVariation, $dataTable, $date);
+				$row = $this->doFilterRecursiveDescend($labelVariation, $dataTable);
 				if ($row)
 				{
 					$row->addMetadata('label_idx', $labelIdx);
