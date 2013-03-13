@@ -27,7 +27,6 @@
  */
 class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableManipulator
 {
-	
 	const SEPARATOR_RECURSIVE_LABEL = '>';
 	
 	private $labelParts;
@@ -48,43 +47,11 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 	{
 		if ($dataTable instanceof Piwik_DataTable_Array)
 		{
-			$result = $dataTable->getEmptyClone();
-			foreach ($dataTable->getArray() as $tableLabel => $childTable)
-			{
-				$date = $childTable->metadata['period']->getDateStart()->toString();
-				$newTable = $this->filter($labels, $childTable, $date);
-				
-				$result->addTable($newTable, $tableLabel);
-			}
-			
-			return $result;
+			return $this->filterDataTableArray($labels, $dataTable);
 		}
 		else if ($dataTable instanceof Piwik_DataTable)
 		{
-			if (!is_array($labels))
-			{
-				$labels = array($labels);
-			}
-			
-			$result = $dataTable->getEmptyClone();
-			foreach ($labels as $labelIdx => $label)
-			{
-				foreach ($this->getLabelVariations($label) as $labelVariation)
-				{
-					$labelVariation = explode(self::SEPARATOR_RECURSIVE_LABEL, $labelVariation);
-					$labelVariation = array_map('urldecode', $labelVariation);
-				
-					$row = $this->doFilterRecursiveDescend($labelVariation, $dataTable, $date);
-					if ($row)
-					{
-						$row->addMetadata('label_idx', $labelIdx);
-						$result->addRow($row);
-						
-						break;
-					}
-				}
-			}
-			return $result;
+			return $this->filterDataTable($labels, $dataTable, $date);
 		}
 		else
 		{
@@ -195,4 +162,50 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 		return $variations;
 	}
 	
+	/**
+	 * Filters child DataTables of a DataTable_Array. See @filter for more info.
+	 */
+	private function filterDataTableArray( $labels, $dataTable )
+	{
+		$result = $dataTable->getEmptyClone();
+		foreach ($dataTable->getArray() as $tableLabel => $childTable)
+		{
+			$date = $childTable->metadata['period']->getDateStart()->toString();
+			$newTable = $this->filter($labels, $childTable, $date);
+			
+			$result->addTable($newTable, $tableLabel);
+		}
+		return $result;
+	}
+	
+	/**
+	 * Filter a Piwik_DataTable instance. See @filter for more info.
+	 */
+	private function filterDataTable( $labels, $dataTable, $date )
+	{
+		if (!is_array($labels))
+		{
+			$labels = array($labels);
+		}
+		
+		$result = $dataTable->getEmptyClone();
+		foreach ($labels as $labelIdx => $label)
+		{
+			foreach ($this->getLabelVariations($label) as $labelVariation)
+			{
+				$labelVariation = explode(self::SEPARATOR_RECURSIVE_LABEL, $labelVariation);
+				$labelVariation = array_map('urldecode', $labelVariation);
+			
+				$row = $this->doFilterRecursiveDescend($labelVariation, $dataTable, $date);
+				if ($row)
+				{
+					$row->addMetadata('label_idx', $labelIdx);
+					$result->addRow($row);
+					
+					break;
+				}
+			}
+		}
+		return $result;
+	}
 }

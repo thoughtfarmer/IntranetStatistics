@@ -124,7 +124,7 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
         $return[]                                               = array('API.getRowEvolution', $config);
         
         // test date range where most recent date has no data (for #3465)
-        $return[] = array('API.getRowEvolution', array( // TODO: remove old file
+        $return[] = array('API.getRowEvolution', array(
         	'testSuffix' => '_multipleDates_lastNoData',
         	'periods' => 'month',
             'idSite' => $idSite,

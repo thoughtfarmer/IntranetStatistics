@@ -313,7 +313,7 @@ class Piwik_API_ResponseBuilder
 		$label = $this->getLabelQueryParam();
 		if (!empty($label))
 		{
-			$label = array_map(array('Piwik_Common', 'unsanitizeInputValue'), $label);
+			$label = Piwik_Common::unsanitizeInputValues($label);
 			$filter = new Piwik_API_DataTableManipulator_LabelFilter($this->apiModule, $this->apiMethod, $this->request);
 			$datatable = $filter->filter($label, $datatable);
 		}

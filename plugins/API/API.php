@@ -1546,9 +1546,7 @@ class Piwik_API_API
 			$column = reset($metrics);
 		}
 		
-		// get the processed label and logo (if any) for every requested label (sometimes labels
-		// will be changed by the API (e.g. for the brosers report). we want to display the changed
-		// label.)
+		// get the processed label and logo (if any) for every requested label
 		$actualLabels = $logos = array();
 		foreach ($labels as $labelIdx => $label)
 		{
