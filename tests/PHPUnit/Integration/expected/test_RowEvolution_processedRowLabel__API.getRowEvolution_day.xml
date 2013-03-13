@@ -4,32 +4,44 @@
 	<reportData>
 		<result date="2010-03-01">
 			<row>
-				<nb_visits_0>2</nb_visits_0>
+				<nb_visits_0>0</nb_visits_0>
+				<nb_visits_1>0</nb_visits_1>
+				<nb_visits_2>1</nb_visits_2>
 			</row>
 		</result>
 		<result date="2010-03-02">
 			<row>
-				<nb_visits_0>2</nb_visits_0>
+				<nb_visits_0>1</nb_visits_0>
+				<nb_visits_1>0</nb_visits_1>
+				<nb_visits_2>0</nb_visits_2>
 			</row>
 		</result>
 		<result date="2010-03-03">
 			<row>
-				<nb_visits_0>2</nb_visits_0>
+				<nb_visits_0>0</nb_visits_0>
+				<nb_visits_1>0</nb_visits_1>
+				<nb_visits_2>1</nb_visits_2>
 			</row>
 		</result>
 		<result date="2010-03-04">
 			<row>
-				<nb_visits_0>2</nb_visits_0>
+				<nb_visits_0>1</nb_visits_0>
+				<nb_visits_1>0</nb_visits_1>
+				<nb_visits_2>0</nb_visits_2>
 			</row>
 		</result>
 		<result date="2010-03-05">
 			<row>
-				<nb_visits_0>2</nb_visits_0>
+				<nb_visits_0>0</nb_visits_0>
+				<nb_visits_1>0</nb_visits_1>
+				<nb_visits_2>1</nb_visits_2>
 			</row>
 		</result>
 		<result date="2010-03-06">
 			<row>
-				<nb_visits_0>2</nb_visits_0>
+				<nb_visits_0>1</nb_visits_0>
+				<nb_visits_1>0</nb_visits_1>
+				<nb_visits_2>0</nb_visits_2>
 			</row>
 		</result>
 	</reportData>
@@ -38,13 +50,18 @@
 			<nb_visits_0>
 				<name>Firefox (Visits)</name>
 				<logo>plugins/UserSettings/images/browsers/FF.gif</logo>
-				<min>2</min>
-				<max>2</max>
-				<change>0%</change>
+				<min>0</min>
+				<max>1</max>
 			</nb_visits_0>
 			<nb_visits_1>
 				<name>Chrome (Visits)</name>
 			</nb_visits_1>
+			<nb_visits_2>
+				<name>Opera (Visits)</name>
+				<min>0</min>
+				<max>1</max>
+				<change>-100%</change>
+			</nb_visits_2>
 		</metrics>
 		<dimension>Browser</dimension>
 		<columns>

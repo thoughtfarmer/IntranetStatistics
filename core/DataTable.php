@@ -891,6 +891,14 @@ class Piwik_DataTable
 		}
 		unset($this->rows[$id]);
 	}
+	
+	/**
+	 * TODO
+	 */
+	public function clear()
+	{
+		$this->rows = array();
+	}
 
 	/**
 	 * Deletes all row from offset, offset + limit.

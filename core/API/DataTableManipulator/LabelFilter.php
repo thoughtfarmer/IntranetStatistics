@@ -30,6 +30,7 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 	const SEPARATOR_RECURSIVE_LABEL = '>';
 	
 	private $labels;
+	private $addEmptyRows;
 
 	/**
 	 * Filter a data table by label.
@@ -41,9 +42,11 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 	 *
 	 * @param string           $labels      the labels to search for
 	 * @param Piwik_DataTable  $dataTable  the data table to be filtered
+	 * @param bool $addEmptyRows Whether to add empty rows when a row isn't found
+	 *                                      for a label, or not.
 	 * @return Piwik_DataTable
 	 */
-	public function filter($labels, $dataTable)
+	public function filter($labels, $dataTable, $addEmptyRows = false)
 	{
 		if (!is_array($labels))
 		{
@@ -51,6 +54,7 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 		}
 		
 		$this->labels = $labels;
+		$this->addEmptyRows = (bool)$addEmptyRows;
 		return $this->manipulate($dataTable);
 	}
 
@@ -145,6 +149,7 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 		$result = $dataTable->getEmptyClone();
 		foreach ($this->labels as $labelIdx => $label)
 		{
+			$row = null;
 			foreach ($this->getLabelVariations($label) as $labelVariation)
 			{
 				$labelVariation = explode(self::SEPARATOR_RECURSIVE_LABEL, $labelVariation);
@@ -153,11 +158,17 @@ class Piwik_API_DataTableManipulator_LabelFilter extends Piwik_API_DataTableMani
 				$row = $this->doFilterRecursiveDescend($labelVariation, $dataTable);
 				if ($row)
 				{
-					$row->addMetadata('label_idx', $labelIdx);
 					$result->addRow($row);
-					
 					break;
 				}
+			}
+			
+			if (empty($row)
+				&& $this->addEmptyRows) // if no row has been found, add an empty one
+			{
+				$row = new Piwik_DataTable_Row();
+				$row->setColumn('label', $label);
+				$result->addRow($row);
 			}
 		}
 		return $result;

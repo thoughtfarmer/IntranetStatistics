@@ -10,6 +10,5 @@
 		<bounce_rate>0%</bounce_rate>
 		<exit_rate>0%</exit_rate>
 		<url>http://example.org/dir/file.php?foo=bar&amp;foo2=bar</url>
-		<label_idx>0</label_idx>
 	</row>
 </result>

@@ -314,8 +314,10 @@ class Piwik_API_ResponseBuilder
 		if (!empty($label))
 		{
 			$label = Piwik_Common::unsanitizeInputValues($label);
+			$addEmptyRows = Piwik_Common::getRequestVar('labelFilterAddEmptyRows', 0, 'int', $this->request) == 1;
+			
 			$filter = new Piwik_API_DataTableManipulator_LabelFilter($this->apiModule, $this->apiMethod, $this->request);
-			$datatable = $filter->filter($label, $datatable);
+			$datatable = $filter->filter($label, $datatable, $addEmptyRows);
 		}
 		return $this->getRenderedDataTable($datatable);
 	}

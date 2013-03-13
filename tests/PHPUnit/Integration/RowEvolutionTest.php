@@ -26,6 +26,7 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
     public function getApiForTesting()
     {
     	$idSite = self::$fixture->idSite;
+    	$idSite2 = self::$fixture->idSite2;
     	$today = self::$fixture->today;
     	$keywords = self::$fixture->keywords;
     	
@@ -142,14 +143,14 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
         $return[] = array('API.getRowEvolution', array(
         	'testSuffix' => '_processedRowLabel',
         	'periods' => 'day',
-        	'idSite' => $idSite,
+        	'idSite' => $idSite2,
         	'date' => $today,
         	'otherRequestParameters' => array(
         		'date' => '2010-03-01,2010-03-06',
         		'period' => 'month',
         		'apiModule' => 'UserSettings',
         		'apiAction' => 'getBrowser',
-        		'label' => 'Firefox,Chrome'
+        		'label' => 'Firefox,Chrome,Opera'
         	)
         	
         ));
@@ -164,5 +165,5 @@ class Test_Piwik_Integration_RowEvolution extends IntegrationTestCase
 }
 
 Test_Piwik_Integration_RowEvolution::$fixture
-	= new Test_Piwik_Fixture_ManyVisitsOverSeveralDaysWithSearchEngineReferrers();
+	= new Test_Piwik_Fixture_TwoSitesManyVisitsOverSeveralDaysWithSearchEngineReferrers();
 

@@ -1226,14 +1226,14 @@ class Piwik_API_API
 			}
 			$labels = array_unique($labels);
 			
-			// set the label_idx metadata of each row
+			// set the label_index metadata of each row
 			$labelsToIdx = array_flip($labels);
 			foreach ($dataTable->getArray() as $table)
 			{
 				foreach ($table->getRows() as $row)
 				{
 					$labelIdx = $labelsToIdx[$row->getColumn('label')];
-					$row->setMetadata('label_idx', $labelIdx);
+					$row->setMetadata('label_index', $labelIdx);
 				}
 			}
 		}
@@ -1283,6 +1283,19 @@ class Piwik_API_API
 	{
 		$metadata = $this->getRowEvolutionMetaData($idSite, $period, $date, $apiModule, $apiAction, $language, $idGoal);
 		$metricNames = array_keys($metadata['metrics']);
+		
+		// remove tables w/ one row w/ no metrics
+		foreach ($dataTable->getArray() as $date => $subTable)
+		{
+			if ($subTable->getRowsCount() > 0)
+			{
+				$row = $subTable->getFirstRow();
+				if (count($row->getColumns()) <= 1)
+				{
+					$subTable->clear();
+				}
+			}
+		}
 
 		$logo = $actualLabel = false;
 		$urlFound = false;
@@ -1322,7 +1335,7 @@ class Piwik_API_API
 				$row->deleteMetadata();
 			}
 		}
-
+		
 		$this->enhanceRowEvolutionMetaData($metadata, $dataTable);
 
 		// if we have a recursive label and no url, use the path
@@ -1344,7 +1357,8 @@ class Piwik_API_API
 
 	private function getRowUrlForEvolutionLabel($row, $apiModule, $apiAction, $labelUseAbsoluteUrl)
 	{
-		if (($url = $row->getMetadata('url'))
+		$url = $row->getMetadata('url');
+		if ($url
 			&& ($apiModule == 'Actions'
 				|| ($apiModule == 'Referers'
 					&& $apiAction == 'getWebsites'))
@@ -1379,6 +1393,7 @@ class Piwik_API_API
 		$parameters = array(
 			'method' => $apiModule.'.'.$apiAction,
 			'label' => $label,
+			'labelFilterAddEmptyRows' => 1,
 			'idSite' => $idSite,
 			'period' => $period,
 			'date' => $date,
@@ -1477,7 +1492,7 @@ class Piwik_API_API
 		unset($metadata['logos']);
 
 		$subDataTables = $dataTable->getArray();
-		$firstDataTable = current($subDataTables);
+		$firstDataTable = reset($subDataTables);
 		$firstDataTableRow = $firstDataTable->getFirstRow();
 		$lastDataTable = end($subDataTables);
 		$lastDataTableRow = $lastDataTable->getFirstRow();
@@ -1552,16 +1567,10 @@ class Piwik_API_API
 		{
 			foreach ($dataTable->getArray() as $table)
 			{
-				// find row w/ label_idx metadata == $labelIdx
-				$labelRow = false;
-				foreach ($table->getRows() as $row)
-				{
-					if ($row->getMetadata('label_idx') == $labelIdx)
-					{
-						$labelRow = $row;
-						break;
-					}
-				}
+				// find row for this label. LabelFilter will add empty rows and
+				// keep them ordered in the same way the labels array is, so we
+				// assume the $labelIdx is also the row Id
+				$labelRow = $table->getRowFromId($labelIdx);
 				
 				if ($labelRow)
 				{
@@ -1570,11 +1579,14 @@ class Piwik_API_API
 					
 					$logos[$labelIdx] = $labelRow->getMetadata('logo');
 					
-					break;
+					if (!empty($actualLabels[$labelIdx]))
+					{
+						break;
+					}
 				}
 			}
 			
-			if (!isset($actualLabels[$labelIdx]))
+			if (empty($actualLabels[$labelIdx]))
 			{
 				$actualLabels[$labelIdx] = $this->cleanOriginalLabel($label);
 			}
@@ -1587,7 +1599,7 @@ class Piwik_API_API
 		{
 			$newRow = new Piwik_DataTable_Row();
 			
-			foreach ($table->getRows() as $row)
+			foreach ($table->getRows() as $rowId => $row)
 			{
 				$value = $row->getColumn($column);
 				$value = floatVal(str_replace(',', '.', $value));
@@ -1596,7 +1608,7 @@ class Piwik_API_API
 					$value = 0;
 				}
 				
-				$newLabel = $column.'_'.$row->getMetadata('label_idx');
+				$newLabel = $column.'_'.$rowId; // $rowId corresponds to the label index
 				
 				$newRow->addColumn($newLabel, $value);
 			}
@@ -1640,16 +1652,12 @@ class Piwik_API_API
 	 * Returns the display label for a row evolution row from the data in
 	 * a DataTable row. If the row has URL metadata, the URL is cleaned and
 	 * used as the display label. Otherwise, the original label is used.
+	 TODO: remove this function
 	 */
 	private function getProcessedLabelForRowEvolution( $originalLabel, $row, $apiModule, $apiAction,
 														 $useAbsoluteUrlForUrl )
 	{
-		$actualLabel = $this->getRowUrlForEvolutionLabel($row, $apiModule, $apiAction, $useAbsoluteUrlForUrl);
-		if (empty($actualLabel))
-		{
-			$actualLabel = $this->cleanOriginalLabel($originalLabel);
-		}
-		return $actualLabel;
+		return $this->getRowUrlForEvolutionLabel($row, $apiModule, $apiAction, $useAbsoluteUrlForUrl);
 	}
 	
 	/**

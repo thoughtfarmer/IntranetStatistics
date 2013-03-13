@@ -251,6 +251,14 @@ class PiwikTracker
     }
     
     /**
+     * TODO
+     */
+    public function setIdSite( $idSite )
+    {
+    	$this->idSite = $idSite;
+    }
+    
+    /**
      * Sets the Browser language. Used to guess visitor countries when GeoIP is not enabled
      * 
      * @param string For example "fr-fr"
