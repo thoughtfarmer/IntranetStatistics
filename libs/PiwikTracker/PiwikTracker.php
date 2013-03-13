@@ -251,7 +251,9 @@ class PiwikTracker
     }
     
     /**
-     * TODO
+     * Sets the current site ID.
+     * 
+     * @param int $idSite
      */
     public function setIdSite( $idSite )
     {

@@ -1283,19 +1283,6 @@ class Piwik_API_API
 	{
 		$metadata = $this->getRowEvolutionMetaData($idSite, $period, $date, $apiModule, $apiAction, $language, $idGoal);
 		$metricNames = array_keys($metadata['metrics']);
-		
-		// remove tables w/ one row w/ no metrics
-		foreach ($dataTable->getArray() as $date => $subTable)
-		{
-			if ($subTable->getRowsCount() > 0)
-			{
-				$row = $subTable->getFirstRow();
-				if (count($row->getColumns()) <= 1)
-				{
-					$subTable->clear();
-				}
-			}
-		}
 
 		$logo = $actualLabel = false;
 		$urlFound = false;
@@ -1393,14 +1380,17 @@ class Piwik_API_API
 		$parameters = array(
 			'method' => $apiModule.'.'.$apiAction,
 			'label' => $label,
-			'labelFilterAddEmptyRows' => 1,
 			'idSite' => $idSite,
 			'period' => $period,
 			'date' => $date,
 			'format' => 'original',
 			'serialize' => '0',
 			'segment' => $segment,
-			'idGoal' => $idGoal
+			'idGoal' => $idGoal,
+			
+			// if more than one label is used, adding empty rows for labels we can't \
+			// find ensures we know the order of the rows in the returned data table
+			'labelFilterAddEmptyRows' => count($label) > 1 ? 1 : 0,
 		);
 
 		// add "processed metrics" like actions per visit or bounce rate
@@ -1574,8 +1564,8 @@ class Piwik_API_API
 				
 				if ($labelRow)
 				{
-					$actualLabels[$labelIdx] = $this->getProcessedLabelForRowEvolution(
-						$label, $labelRow, $apiModule, $apiAction, $labelUseAbsoluteUrl);
+					$actualLabels[$labelIdx] = $this->getRowUrlForEvolutionLabel(
+						$labelRow, $apiModule, $apiAction, $labelUseAbsoluteUrl);
 					
 					$logos[$labelIdx] = $labelRow->getMetadata('logo');
 					
@@ -1646,18 +1636,6 @@ class Piwik_API_API
 			'reportData' => $dataTableMulti,
 			'metadata' => $metadata
 		);
-	}
-	
-	/**
-	 * Returns the display label for a row evolution row from the data in
-	 * a DataTable row. If the row has URL metadata, the URL is cleaned and
-	 * used as the display label. Otherwise, the original label is used.
-	 TODO: remove this function
-	 */
-	private function getProcessedLabelForRowEvolution( $originalLabel, $row, $apiModule, $apiAction,
-														 $useAbsoluteUrlForUrl )
-	{
-		return $this->getRowUrlForEvolutionLabel($row, $apiModule, $apiAction, $useAbsoluteUrlForUrl);
 	}
 	
 	/**

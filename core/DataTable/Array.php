@@ -158,14 +158,6 @@ class Piwik_DataTable_Array
 	}
 	
 	/**
-	 * TODO
-	 */
-	public function removeTable( $label )
-	{
-		unset($this->array[$label]);
-	}
-	
-	/**
 	 * Returns a string output of this DataTable_Array (applying the default renderer to every DataTable
 	 * of this DataTable_Array).
 	 *
