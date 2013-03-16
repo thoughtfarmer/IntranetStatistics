@@ -1,4 +1,6 @@
 import functools
+import os
+import nose
 
 import import_logs
 
@@ -6,11 +8,36 @@ import import_logs
 def test_format_detection():
     def _test(format_name):
         file = open('logs/%s.log' % format_name)
-        assert(import_logs.Parser.detect_format(file).name == format_name)
+        format = import_logs.Parser.detect_format(file)
+        assert(format is not None)
+        assert(format.name == format_name)
+    
+    def teardown_test_junk():
+        if os.path.exists('tmp.log'):
+            os.remove('tmp.log')
+    
+    def _test_junk(format_name):
+        file = open('logs/%s.log' % format_name)
+        contents = file.read()
+        file.close()
+        
+        file = open('tmp.log', 'w')
+        file.write(contents + ' junk')
+        file.close()
+        
+        file = open('tmp.log')
+        format = import_logs.Parser.detect_format(file)
+        assert(format is not None)
+        assert(format.name == format_name)
 
     for format_name in import_logs.FORMATS.iterkeys():
         f = functools.partial(_test, format_name)
         f.description = 'Testing autodetection of format ' + format_name
+        yield f
+        
+        f = functools.partial(_test_junk, format_name)
+        f.description = 'Testing autodetection of format ' + format_name + ' w/ garbage at end of line'
+        f.teardown = teardown_test_junk
         yield f
 
 
