@@ -174,7 +174,7 @@ _NCSA_EXTENDED_LOG_FORMAT = (_COMMON_LOG_FORMAT +
 _S3_LOG_FORMAT = (
     '\S+ (?P<host>\S+) \[(?P<date>.*?) (?P<timezone>.*?)\] (?P<ip>\S+) '
     '\S+ \S+ \S+ \S+ "\S+ (?P<path>.*?) \S+" (?P<status>\S+) \S+ (?P<length>\S+) '
-    '\S+ \S+ \S+ "(?P<referrer>.*?)" "(?P<user_agent>.*?)" \S+'
+    '\S+ \S+ \S+ "(?P<referrer>.*?)" "(?P<user_agent>.*?)"'
 )
 
 FORMATS = {
@@ -1292,7 +1292,6 @@ class Parser(object):
         return True
 
     def check_http_redirect(self, hit):
-        logging.debug('HIT STATUS: ' + str(hit.status))
         if hit.status[0] == '3' and hit.status != '304':
             if config.options.enable_http_redirects:
                 hit.is_redirect = True
