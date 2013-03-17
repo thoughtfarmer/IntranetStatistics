@@ -1310,7 +1310,7 @@ class Parser(object):
     @staticmethod
     def detect_format(file):
         """
-        Return the format matching this file, or None if none was found.
+        Return the best matching format for this file, or None if none was found.
         """
         logging.debug('Detecting the log format')
         format = None
@@ -1319,12 +1319,14 @@ class Parser(object):
             match = candidate_format.check_format(file)
             if match:
                 logging.debug('Format %s matches', name)
+                
+                # if there's more info in this match, use this format
                 if format_groups < len(match.groups()):
                     format = candidate_format
                     format_groups = len(match.groups())
             else:
                 logging.debug('Format %s does not match', name)
-        logging.debug('Format %s is the best match', name)
+        logging.debug('Format %s is the best match', format.name)
         return format
 
     def parse(self, filename):
