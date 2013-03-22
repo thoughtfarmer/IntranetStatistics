@@ -42,23 +42,28 @@ class Piwik_CoreAdminHome_Controller extends Piwik_Controller_Admin
 			$view->todayArchiveTimeToLive = $todayArchiveTimeToLive;
 			$view->enableBrowserTriggerArchiving = $enableBrowserTriggerArchiving;
 
-			if(!Piwik_Config::getInstance()->isFileWritable())
+			$config = Piwik_Config::getInstance();
+
+			if(!$config->isFileWritable())
 			{
 				$view->configFileNotWritable = true;
 			}
 
-			$view->mail = Piwik_Config::getInstance()->mail;
+			$debug = $config->Debug;
+			$view->enableBetaReleaseCheck = $debug['allow_upgrades_to_beta'];
 
-			$view->branding = Piwik_Config::getInstance()->branding;
+			$view->mail = $config->mail;
+
+			$view->branding = $config->branding;
 
 			$directoryWritable = is_writable(PIWIK_DOCUMENT_ROOT.'/themes/');
 			$logoFilesWriteable = is_writeable(PIWIK_DOCUMENT_ROOT.'/themes/logo.png') && is_writeable(PIWIK_DOCUMENT_ROOT.'/themes/logo-header.png');
 			$view->logosWriteable = ($logoFilesWriteable || $directoryWritable) && ini_get('file_uploads') == 1;
 
 			$trustedHosts = array();
-			if (isset(Piwik_Config::getInstance()->General['trusted_hosts']))
+			if (isset($config->General['trusted_hosts']))
 			{
-				$trustedHosts = Piwik_Config::getInstance()->General['trusted_hosts'];
+				$trustedHosts = $config->General['trusted_hosts'];
 			}
 			$view->trustedHosts = $trustedHosts;
 		}
@@ -91,13 +96,19 @@ class Piwik_CoreAdminHome_Controller extends Piwik_Controller_Admin
 			$mail['username'] = Piwik_Common::unsanitizeInputValue(Piwik_Common::getRequestVar('mailUsername', ''));
 			$mail['password'] = Piwik_Common::unsanitizeInputValue(Piwik_Common::getRequestVar('mailPassword', ''));
 			$mail['encryption'] = Piwik_Common::getRequestVar('mailEncryption', '');
-			Piwik_Config::getInstance()->mail = $mail;
-			
+
+			$config = Piwik_Config::getInstance();
+			$config->mail = $mail;
+
 			// update branding settings
-			$branding = Piwik_Config::getInstance()->branding;
+			$branding = $config->branding;
 			$branding['use_custom_logo'] = Piwik_Common::getRequestVar('useCustomLogo', '0');
-			Piwik_Config::getInstance()->branding = $branding;
-			
+			$config->branding = $branding;
+
+			// update beta channel setting
+			$debug = $config->Debug;
+			$debug['allow_upgrades_to_beta'] = Piwik_Common::getRequestVar('enableBetaReleaseCheck', '0', 'int');
+			$config->Debug = $debug;
 			// update trusted host settings
 			$trustedHosts = Piwik_Common::getRequestVar('trustedHosts', false, 'json');
 			if ($trustedHosts !== false)
@@ -105,7 +116,7 @@ class Piwik_CoreAdminHome_Controller extends Piwik_Controller_Admin
 				Piwik_Url::saveTrustedHostnameInConfig($trustedHosts);
 			}
 			
-			Piwik_Config::getInstance()->forceSave();
+			$config->forceSave();
 			
 			$toReturn = $response->getResponse();
 		} catch(Exception $e ) {

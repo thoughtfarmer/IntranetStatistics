@@ -256,6 +256,16 @@ class PiwikTracker
     }
     
     /**
+     * Sets the current site ID.
+     * 
+     * @param int $idSite
+     */
+    public function setIdSite( $idSite )
+    {
+    	$this->idSite = $idSite;
+    }
+    
+    /**
      * Sets the Browser language. Used to guess visitor countries when GeoIP is not enabled
      * 
      * @param string $acceptLanguage For example "fr-fr"
@@ -629,7 +639,7 @@ class PiwikTracker
     public function getUrlTrackPageView( $documentTitle = '' )
     {
     	$url = $this->getRequest( $this->idSite );
-    	if(!empty($documentTitle)) {
+    	if(strlen($documentTitle) > 0) {
     		$url .= '&action_name=' . urlencode($documentTitle);
     	}
     	return $url;
@@ -648,7 +658,7 @@ class PiwikTracker
 	{
 		$url = $this->getRequest( $this->idSite );
 		$url .= '&search=' . urlencode($keyword);
-		if(!empty($category)) {
+		if(strlen($category) > 0) {
 			$url .= '&search_cat=' . urlencode($category);
 		}
 		if(!empty($countResults) || $countResults === 0) {

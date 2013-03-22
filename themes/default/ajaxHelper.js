@@ -66,6 +66,12 @@ function ajaxHelper() {
      */
     this.callback =       function () {};
 
+	/**
+	 * Use this.callback if an error is returned
+	 * @type {Boolean}
+	 */
+	this.useRegularCallbackInCaseOfError = false;
+
     /**
      * Callback function to be executed on error
      */
@@ -130,8 +136,6 @@ function ajaxHelper() {
     /**
      * Gets this helper instance ready to send a bulk request. Each argument to this
      * function is a single request to use.
-     * 
-     * @param {object} ... The requests to send simultaneously.
      */
     this.setBulkRequests = function () {
     	var urls = [];
@@ -154,10 +158,19 @@ function ajaxHelper() {
      * @param {function} callback  Callback function
      * @return {void}
      */
-
     this.setCallback = function (callback) {
         this.callback = callback;
     };
+
+	/**
+	 * Set that the callback passed to setCallback() should be used if an application error (i.e. an
+	 * Exception in PHP) is returned.
+	 * 
+	 * @param {void}
+	 */
+	this.useCallbackInCaseOfError = function () {
+		this.useRegularCallbackInCaseOfError = true;
+	};
 
     /**
      * Set callback to redirect on success handler
@@ -175,12 +188,9 @@ function ajaxHelper() {
             var urlToRedirect = piwikHelper.getCurrentQueryStringWithParametersModified(params);
             var updatedUrl = new RegExp('&updated=([0-9]+)');
             var updatedCounter = updatedUrl.exec(urlToRedirect);
-            if(!updatedCounter)
-            {
+            if (!updatedCounter) {
                 urlToRedirect += '&updated=1';
-            }
-            else
-            {
+            } else {
                 updatedCounter = 1 + parseInt(updatedCounter[1]);
                 urlToRedirect = urlToRedirect.replace(new RegExp('(&updated=[0-9]+)'), '&updated=' + updatedCounter);
             }
@@ -307,7 +317,7 @@ function ajaxHelper() {
                     $(that.loadingElement).hide();
                 }
 
-                if (response && response.result == 'error') {
+                if (response && response.result == 'error' && !that.useRegularCallbackInCaseOfError) {
                     if ($(that.errorElement).length && response.message) {
                         $(that.errorElement).html(response.message).fadeIn();
                         piwikHelper.lazyScrollTo(that.errorElement, 250);
