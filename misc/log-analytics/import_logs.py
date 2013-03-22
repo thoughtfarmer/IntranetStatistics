@@ -168,16 +168,16 @@ class IisFormat(RegexFormat):
 
 _HOST_PREFIX = '(?P<host>[\w\-\.]*)(?::\d+)? '
 _COMMON_LOG_FORMAT = (
-    '(?P<ip>\S+) \S+ \S+ \[(?P<date>\S*?) (?P<timezone>\S*?)\] '
-    '"\S+ (?P<path>\S*?) \S+" (?P<status>\S+) (?P<length>\S+)'
+    '(?P<ip>\S+) \S+ \S+ \[(?P<date>.*?) (?P<timezone>.*?)\] '
+    '"\S+ (?P<path>.*?) \S+" (?P<status>\S+) (?P<length>\S+)'
 )
 _NCSA_EXTENDED_LOG_FORMAT = (_COMMON_LOG_FORMAT +
-    ' "(?P<referrer>[^"]*?)" "(?P<user_agent>[^"]*?)"'
+    ' "(?P<referrer>.*?)" "(?P<user_agent>.*?)"'
 )
 _S3_LOG_FORMAT = (
-    '\S+ (?P<host>\S+) \[(?P<date>\S*?) (?P<timezone>\S*?)\] (?P<ip>\S+) '
-    '\S+ \S+ \S+ \S+ "\S+ (?P<path>\S*?) \S+" (?P<status>\S+) \S+ (?P<length>\S+) '
-    '\S+ \S+ \S+ "(?P<referrer>[^"]*?)" "(?P<user_agent>[^"]*?)"'
+    '\S+ (?P<host>\S+) \[(?P<date>.*?) (?P<timezone>.*?)\] (?P<ip>\S+) '
+    '\S+ \S+ \S+ \S+ "\S+ (?P<path>.*?) \S+" (?P<status>\S+) \S+ (?P<length>\S+) '
+    '\S+ \S+ \S+ "(?P<referrer>.*?)" "(?P<user_agent>.*?)"'
 )
 
 FORMATS = {
