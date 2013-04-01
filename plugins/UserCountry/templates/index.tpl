@@ -1,16 +1,15 @@
-
 <div id="leftcolumn">
-{postEvent name="template_leftColumnUserCountry"}
+    {postEvent name="template_leftColumnUserCountry"}
 
-<h2>{'UserCountry_Continent'|translate}</h2>
+    <h2>{'UserCountry_Continent'|translate}</h2>
     {'UserCountry-getContinent'|renderDataTable}
 
-	<div class="sparkline">
-	{sparkline src=$urlSparklineCountries}
-	{'UserCountry_DistinctCountries'|translate:"<strong>$numberDistinctCountries</strong>"}
-	</div>
+    <div class="sparkline">
+        {sparkline src=$urlSparklineCountries}
+        {'UserCountry_DistinctCountries'|translate:"<strong>$numberDistinctCountries</strong>"}
+    </div>
 
-{postEvent name="template_footerUserCountry"}
+    {postEvent name="template_footerUserCountry"}
 
 </div>
 
@@ -18,10 +17,10 @@
 
     <h2>{'UserCountry_Country'|translate}</h2>
     {'UserCountry-getCountry'|renderDataTable}
-    
+
     <h2>{'UserCountry_Region'|translate}</h2>
     {'UserCountry-getRegion'|renderDataTable}
-    
+
     <h2>{'UserCountry_City'|translate}</h2>
     {'UserCountry-getCity'|renderDataTable}
 

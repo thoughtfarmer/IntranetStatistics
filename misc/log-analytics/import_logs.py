@@ -69,6 +69,8 @@ EXCLUDED_USER_AGENTS = (
     'bot/',
     'ccooter/',
     'crawl',
+    'curl',
+    'echoping',
     'exabot',
     'feed',
     'googlebot',
@@ -78,6 +80,7 @@ EXCLUDED_USER_AGENTS = (
     'mediapartners-google',
     'msnbot',
     'netcraftsurvey',
+    'panopta',
     'robot',
     'spider',
     'surveybot',
@@ -105,17 +108,23 @@ class RegexFormat(object):
 
     def __init__(self, name, regex, date_format='%d/%b/%Y:%H:%M:%S'):
         self.name = name
-        self.regex = re.compile(regex + '\s*$') # make sure regex includes end of line
+        if regex is not None:
+            self.regex = re.compile(regex)
         self.date_format = date_format
 
     def check_format(self, file):
         line = file.readline()
         file.seek(0)
-        if re.match(self.regex, line):
-            return self
+        return self.check_format_line(line)
+    
+    def check_format_line(self, line):
+        return re.match(self.regex, line)
 
 
-class IisFormat(object):
+class IisFormat(RegexFormat):
+
+    def __init__(self):
+        super(IisFormat, self).__init__('iis', None, '%Y-%m-%d %H:%M:%S')
 
     def check_format(self, file):
         line = file.readline()
@@ -148,7 +157,12 @@ class IisFormat(object):
             except KeyError:
                 regex = '\S+'
             full_regex.append(regex)
-        return RegexFormat('iis', ' '.join(full_regex), '%Y-%m-%d %H:%M:%S')
+        self.regex = re.compile(' '.join(full_regex))
+        
+        start_pos = file.tell()
+        nextline = file.readline()
+        file.seek(start_pos)
+        return self.check_format_line(nextline)
 
 
 
@@ -163,7 +177,7 @@ _NCSA_EXTENDED_LOG_FORMAT = (_COMMON_LOG_FORMAT +
 _S3_LOG_FORMAT = (
     '\S+ (?P<host>\S+) \[(?P<date>.*?) (?P<timezone>.*?)\] (?P<ip>\S+) '
     '\S+ \S+ \S+ \S+ "\S+ (?P<path>.*?) \S+" (?P<status>\S+) \S+ (?P<length>\S+) '
-    '\S+ \S+ \S+ "(?P<referrer>.*?)" "(?P<user_agent>.*?)" \S+'
+    '\S+ \S+ \S+ "(?P<referrer>.*?)" "(?P<user_agent>.*?)"'
 )
 
 FORMATS = {
@@ -1139,6 +1153,8 @@ class Recorder(object):
                 urllib.quote(args['url'], ''),
                 ("/From = %s" % urllib.quote(args['urlref'], '') if args['urlref'] != ''  else '')
             )
+        if hit.generation_time_milli > 0:
+            args['generation_time_ms'] = hit.generation_time_milli
         return args
 
     def _record_hits(self, hits):
@@ -1299,16 +1315,27 @@ class Parser(object):
     @staticmethod
     def detect_format(file):
         """
-        Return the format matching this file, or None if none was found.
+        Return the best matching format for this file, or None if none was found.
         """
         logging.debug('Detecting the log format')
+        
+        format = None
+        format_groups = 0
         for name, candidate_format in FORMATS.iteritems():
-            format = candidate_format.check_format(file)
-            if format:
+            match = candidate_format.check_format(file)
+            if match:
                 logging.debug('Format %s matches', name)
-                return format
+                
+                # if there's more info in this match, use this format
+                match_groups = len(match.groups())
+                if format_groups < match_groups:
+                    format = candidate_format
+                    format_groups = match_groups
             else:
                 logging.debug('Format %s does not match', name)
+        
+        logging.debug('Format %s is the best match', format.name)
+        return format
 
     def parse(self, filename):
         """
@@ -1410,6 +1437,11 @@ class Parser(object):
             except (ValueError, IndexError):
                 # Some lines or formats don't have a length (e.g. 304 redirects, IIS logs)
                 hit.length = 0
+                
+            try:
+			    hit.generation_time_milli = int(match.group('generation_time_micro')) / 1000
+            except IndexError:
+                hit.generation_time_milli = 0
 
             if config.options.log_hostname:
                 hit.host = config.options.log_hostname

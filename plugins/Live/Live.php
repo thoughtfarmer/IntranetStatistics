@@ -15,84 +15,84 @@
  */
 class Piwik_Live extends Piwik_Plugin
 {
-	public function getInformation()
-	{
-		return array(
-			'description' => Piwik_Translate('Live_PluginDescription'),
-			'author' => 'Piwik',
-			'author_homepage' => 'http://piwik.org/',
-			'version' => Piwik_Version::VERSION,
-		);
-	}
+    public function getInformation()
+    {
+        return array(
+            'description'     => Piwik_Translate('Live_PluginDescription'),
+            'author'          => 'Piwik',
+            'author_homepage' => 'http://piwik.org/',
+            'version'         => Piwik_Version::VERSION,
+        );
+    }
 
-	function getListHooksRegistered()
-	{
-		return array(
-			'AssetManager.getJsFiles' => 'getJsFiles',
-			'AssetManager.getCssFiles' => 'getCssFiles',
-			'WidgetsList.add' => 'addWidget',
-			'DataTableList.add' => 'addDataTable',
-			'Menu.add' => 'addMenu',
-		);
-	}
+    function getListHooksRegistered()
+    {
+        return array(
+            'AssetManager.getJsFiles'  => 'getJsFiles',
+            'AssetManager.getCssFiles' => 'getCssFiles',
+            'WidgetsList.add'          => 'addWidget',
+            'DataTableList.add'        => 'addDataTable',
+            'Menu.add'                 => 'addMenu',
+        );
+    }
 
-	/**
-	 * @param Piwik_Event_Notification $notification  notification object
-	 */
-	function getCssFiles( $notification )
-	{
-		$cssFiles = &$notification->getNotificationObject();
-		
-		$cssFiles[] = "plugins/Live/templates/live.css";
-	}	
+    /**
+     * @param Piwik_Event_Notification $notification  notification object
+     */
+    function getCssFiles($notification)
+    {
+        $cssFiles = & $notification->getNotificationObject();
 
-	/**
-	 * @param Piwik_Event_Notification $notification  notification object
-	 */
-	function getJsFiles( $notification )
-	{
-		$jsFiles = &$notification->getNotificationObject();
-		
-		$jsFiles[] = "plugins/Live/templates/scripts/live.js";
-	}
+        $cssFiles[] = "plugins/Live/templates/live.css";
+    }
 
-	function addMenu()
-	{
-		Piwik_AddMenu('General_Visitors', 'Live_VisitorLog', array('module' => 'Live', 'action' => 'getVisitorLog'), true, $order = 5);
-	}
+    /**
+     * @param Piwik_Event_Notification $notification  notification object
+     */
+    function getJsFiles($notification)
+    {
+        $jsFiles = & $notification->getNotificationObject();
 
-	public function addWidget() 
-	{
-		Piwik_WidgetsList::getInstance()->add('Live!', 'Live_VisitorsInRealTime', 'widgetLivewidget', array(
-			'module' => 'Live',
-			'action' => 'widget'
-		));
-	}
+        $jsFiles[] = "plugins/Live/templates/scripts/live.js";
+    }
 
-	public function addDataTable()
-	{
-		Piwik_DataTableList::getInstance()->add('Live-getVisitorLog', array(
-			'apiMethod'                   => 'Live.getLastVisitsDetails',
-			'disableGenericFilters'       => true,
-			'disableSort'                 => true,
-			'defaultSort'                 => 'idVisit',
-			'defaultSortOrder'            => 'asc',
-			'disableSearch'               => true,
-			'limit'                       => 20,
-			'disableOffsetInformation'    => true,
-			'disableExcludeLowPopulation' => true,
-			'disableShowAllColumns'       => true,
-			'disableShowAllViewsIcons'    => true,
-			'disableShowExportAsRssFeed'  => true,
-			'reportDocumentation'         => Piwik_Translate('Live_VisitorLogDocumentation', array('<br />', '<br />')),
-			'customParameters'            => array(
-				'dataTablePreviousIsFirst' => 1,
-				'filterEcommerce'          => Piwik_Common::getRequestVar('filterEcommerce', 0, 'int'),
-				'pageUrlNotDefined'        => Piwik_Translate('General_NotDefined', Piwik_Translate('Actions_ColumnPageURL')),
-			),
-			'template'                    => 'Live/templates/visitorLog.tpl',
-			'disableRowActions'           => true,
-		), 'Live!', 'Live_VisitorLog');
-	}
+    function addMenu()
+    {
+        Piwik_AddMenu('General_Visitors', 'Live_VisitorLog', array('module' => 'Live', 'action' => 'getVisitorLog'), true, $order = 5);
+    }
 
+    public function addWidget() 
+    {
+        Piwik_WidgetsList::getInstance()->add('Live!', 'Live_VisitorsInRealTime', 'widgetLivewidget', array(
+            'module' => 'Live',
+            'action' => 'widget'
+        ));
+    }
+
+    public function addDataTable()
+    {
+        Piwik_DataTableList::getInstance()->add('Live-getVisitorLog', array(
+            'apiMethod'                   => 'Live.getLastVisitsDetails',
+            'disableGenericFilters'       => true,
+            'disableSort'                 => true,
+            'defaultSort'                 => 'idVisit',
+            'defaultSortOrder'            => 'asc',
+            'disableSearch'               => true,
+            'limit'                       => 20,
+            'disableOffsetInformation'    => true,
+            'disableExcludeLowPopulation' => true,
+            'disableShowAllColumns'       => true,
+            'disableShowAllViewsIcons'    => true,
+            'disableShowExportAsRssFeed'  => true,
+            'reportDocumentation'         => Piwik_Translate('Live_VisitorLogDocumentation', array('<br />', '<br />')),
+            'customParameters'            => array(
+                'dataTablePreviousIsFirst' => 1,
+                'totalRow'                 => 10000000,
+                'filterEcommerce'          => Piwik_Common::getRequestVar('filterEcommerce', 0, 'int'),
+                'pageUrlNotDefined'        => Piwik_Translate('General_NotDefined', Piwik_Translate('Actions_ColumnPageURL')),
+            ),
+            'template'                    => 'Live/templates/visitorLog.tpl',
+            'disableRowActions'           => true,
+        ), 'Live!', 'Live_VisitorLog');
+    }
 }

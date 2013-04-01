@@ -55,8 +55,9 @@ var piwikHelper = {
 	 */
 	addBreakpoints: function(text, breakpointMarkup)
 	{
-		return text.replace(/([\/&=?\.%#:])/g, '$1' +
-			(typeof breakpointMarkup == 'undefined' ? '<wbr>' : breakpointMarkup));
+		return text.replace(/([\/&=?\.%#:_-])/g, '$1' +
+			(typeof breakpointMarkup == 'undefined' ? '<wbr>&#8203;' : breakpointMarkup));
+			 // &#8203; is for internet explorer
 	},
 
 	/**
@@ -72,7 +73,7 @@ var piwikHelper = {
 		}
 		url = piwikHelper.addBreakpoints(url, '|||');
 		url = $(document.createElement('p')).text(url).html();
-		url = url.replace(/\|\|\|/g, '<wbr />');
+		url = url.replace(/\|\|\|/g, '<wbr />&#8203;'); // &#8203; is for internet explorer
 		return url;
 	},
 
@@ -123,7 +124,7 @@ var piwikHelper = {
         if(newparams) {
             if(parameters != '') {
                 var r, i, keyvalue, keysvalues = newparams.split('&');
-                for(i in keysvalues) {
+                for(i = 0; i < keysvalues.length; i++) {
                     keyvalue = keysvalues[i].split('=');
                     r = new RegExp('(^|[?&])'+keyvalue[0]+'=[^&]*');
                     parameters = parameters.replace(r, '');

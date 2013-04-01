@@ -15,12 +15,11 @@
  */
 class Piwik_CustomVariables_Controller extends Piwik_Controller
 {
-	
-	function index($fetch = false)
-	{
-		return Piwik_View::singleReport(
-				Piwik_Translate('CustomVariables_CustomVariables'),
-				$this->_fetchDataTable('CustomVariables-getCustomVariables'), $fetch);
-	}
+    function index($fetch = false)
+    {
+        return Piwik_View::singleReport(
+                Piwik_Translate('CustomVariables_CustomVariables'),
+                $this->_fetchDataTable('CustomVariables-getCustomVariables'), $fetch);
+    }
 }
 

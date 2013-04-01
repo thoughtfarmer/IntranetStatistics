@@ -15,201 +15,199 @@
  */
 class Piwik_VisitFrequency extends Piwik_Plugin
 {
-	public function getInformation()
-	{
-		$info = array(
-			'description' => Piwik_Translate('VisitFrequency_PluginDescription'),
-			'author' => 'Piwik',
-			'author_homepage' => 'http://piwik.org/',
-			'version' => Piwik_Version::VERSION,
-		);
-		return $info;
-	}
+    public function getInformation()
+    {
+        $info = array(
+            'description'     => Piwik_Translate('VisitFrequency_PluginDescription'),
+            'author'          => 'Piwik',
+            'author_homepage' => 'http://piwik.org/',
+            'version'         => Piwik_Version::VERSION,
+        );
+        return $info;
+    }
 
-	function getListHooksRegistered()
-	{
-		$hooks = array(
-			'ArchiveProcessing_Day.compute' => 'archiveDay',
-			'ArchiveProcessing_Period.compute' => 'archivePeriod',
-			'DataTableList.add' => 'addDataTables',
-			'WidgetsList.add' => 'addWidgets',
-			'Menu.add' => 'addMenu',
-			'API.getReportMetadata' => 'getReportMetadata',
-		);
-		return $hooks;
-	}
+    function getListHooksRegistered()
+    {
+        $hooks = array(
+            'ArchiveProcessing_Day.compute'    => 'archiveDay',
+            'ArchiveProcessing_Period.compute' => 'archivePeriod',
+            'DataTableList.add'                => 'addDataTables',
+            'WidgetsList.add'                  => 'addWidgets',
+            'Menu.add'                         => 'addMenu',
+            'API.getReportMetadata'            => 'getReportMetadata',
+        );
+        return $hooks;
+    }
 
-	/**
-	 * @param Piwik_Event_Notification $notification  notification object
-	 */
-	public function getReportMetadata($notification)
-	{
-		$reports = &$notification->getNotificationObject();
-		$reports[] = array(
-			'category' => Piwik_Translate('General_Visitors'),
-			'name' => Piwik_Translate('VisitFrequency_ColumnReturningVisits'),
-			'module' => 'VisitFrequency',
-			'action' => 'get',
-			'metrics' => array(
-    			'nb_visits_returning' => Piwik_Translate('VisitFrequency_ColumnReturningVisits'),
-    			'nb_actions_returning' => Piwik_Translate('VisitFrequency_ColumnActionsByReturningVisits'),
-    			'avg_time_on_site_returning' => Piwik_Translate('VisitFrequency_ColumnAverageVisitDurationForReturningVisitors'),
-    			'bounce_rate_returning' => Piwik_Translate('VisitFrequency_ColumnBounceRateForReturningVisits'),
-    			'nb_actions_per_visit_returning' => Piwik_Translate('VisitFrequency_ColumnAvgActionsPerReturningVisit'),
-				'nb_uniq_visitors_returning' => Piwik_Translate('VisitFrequency_ColumnUniqueReturningVisitors'),
+    /**
+     * @param Piwik_Event_Notification $notification  notification object
+     */
+    public function getReportMetadata($notification)
+    {
+        $reports = & $notification->getNotificationObject();
+        $reports[] = array(
+            'category'         => Piwik_Translate('General_Visitors'),
+            'name'             => Piwik_Translate('VisitFrequency_ColumnReturningVisits'),
+            'module'           => 'VisitFrequency',
+            'action'           => 'get',
+            'metrics'          => array(
+                'nb_visits_returning'            => Piwik_Translate('VisitFrequency_ColumnReturningVisits'),
+                'nb_actions_returning'           => Piwik_Translate('VisitFrequency_ColumnActionsByReturningVisits'),
+                'avg_time_on_site_returning'     => Piwik_Translate('VisitFrequency_ColumnAverageVisitDurationForReturningVisitors'),
+                'bounce_rate_returning'          => Piwik_Translate('VisitFrequency_ColumnBounceRateForReturningVisits'),
+                'nb_actions_per_visit_returning' => Piwik_Translate('VisitFrequency_ColumnAvgActionsPerReturningVisit'),
+                'nb_uniq_visitors_returning'     => Piwik_Translate('VisitFrequency_ColumnUniqueReturningVisitors'),
 // Not displayed
 //    			'nb_visits_converted_returning',
 //    			'sum_visit_length_returning',
 //    			'max_actions_returning',
 //    			'bounce_count_returning',
-			),
-			'processedMetrics' => false,
-			'order' => 40
-		);
-	}
+            ),
+            'processedMetrics' => false,
+            'order'            => 40
+        );
+    }
 
-	public function addWidgets()
-	{
-		Piwik_WidgetsList::getInstance()->add('General_Visitors', 'VisitFrequency_WidgetOverview', 'widgetVisitFrequencygetSparklines', array(
-			'module' => 'VisitFrequency',
-			'action' => 'getSparklines'
-		));
-	}
+    function addWidgets()
+    {
+        Piwik_WidgetsList::getInstance()->add('General_Visitors', 'VisitFrequency_WidgetOverview', 'widgetVisitFrequencygetSparklines', array(
+            'module' => 'VisitFrequency',
+            'action' => 'getSparklines'
+        ));
+    }
 
-	public function addDataTables()
-	{
-		$documentation = Piwik_Translate('VisitFrequency_ReturningVisitsDocumentation') . '<br />'
-			. Piwik_Translate('General_BrokenDownReportDocumentation') . '<br />'
-			. Piwik_Translate('VisitFrequency_ReturningVisitDocumentation');
+    public function addDataTables()
+    {
+        $documentation = Piwik_Translate('VisitFrequency_ReturningVisitsDocumentation') . '<br />'
+        . Piwik_Translate('General_BrokenDownReportDocumentation') . '<br />'
+            . Piwik_Translate('VisitFrequency_ReturningVisitDocumentation');
+   
+        $columnsToDisplay = array('nb_visits_returning');
+   
+        $selectableColumns = array(
+            // columns from VisitFrequency.get
+            'nb_visits_returning',
+            'nb_actions_returning',
+            'nb_actions_per_visit_returning',
+            'bounce_rate_returning',
+            'avg_time_on_site_returning',
+            // columns from VisitsSummary.get
+            'nb_visits',
+            'nb_actions',
+            'nb_actions_per_visit',
+            'bounce_rate',
+            'avg_time_on_site'
+        );
+   
+        $period = Piwik_Common::getRequestVar('period', false);
+        if ($period == 'day') {
+            // add number of unique (returning) visitors for period=day
+            $selectableColumns = array_merge(
+                array($selectableColumns[0]),
+                array('nb_uniq_visitors_returning'),
+                array_slice($selectableColumns, 1, -4),
+                array('nb_uniq_visitors'),
+                array_slice($selectableColumns, -4));
+        }
+   
+        $idSite = Piwik_Common::getRequestVar('idSite');
+        $period = Piwik_Common::getRequestVar('period');
+        $date   = Piwik_Common::getRequestVar('date');
+        $meta   = Piwik_API_API::getInstance()->getReportMetadata($idSite, $period, $date);
+   
+        $columns      = array_merge($columnsToDisplay, $selectableColumns);
+        $translations = array();
+        foreach ($meta as $reportMeta) {
+            if ($reportMeta['action'] == 'get' && !isset($reportMeta['parameters'])) {
+                foreach ($columns as $column) {
+                    if (isset($reportMeta['metrics'][$column])) {
+                        $translations[$column] = $reportMeta['metrics'][$column];
+                    }
+                }
+            }
+        }
+   
+        Piwik_DataTableList::getInstance()->add('VisitFrequency-getEvolutionGraph', array(
+            'apiMethod'           => 'API.get',
+            'viewDataTable'       => 'graphEvolution',
+            'reportDocumentation' => $documentation,
+            'columnsToTranslate'  => $translations,
+            'columnsToDisplay'    => implode(',', $columnsToDisplay),
+            'selectableColumns'   => $selectableColumns,
+        ), 'General_Visitors', 'VisitFrequency_WidgetGraphReturning');
+    }
+    
+    function addMenu()
+    {
+        Piwik_AddMenu('General_Visitors', 'VisitFrequency_SubmenuFrequency', array('module' => 'VisitFrequency', 'action' => 'index'));
+    }
 
-		$columnsToDisplay = array('nb_visits_returning');
+    /**
+     * @param Piwik_Event_Notification $notification  notification object
+     * @return mixed
+     */
+    function archivePeriod($notification)
+    {
+        $archiveProcessing = $notification->getNotificationObject();
 
-		$selectableColumns = array(
-			// columns from VisitFrequency.get
-			'nb_visits_returning',
-			'nb_actions_returning',
-			'nb_actions_per_visit_returning',
-			'bounce_rate_returning',
-			'avg_time_on_site_returning',
-			// columns from VisitsSummary.get
-			'nb_visits',
-			'nb_actions',
-			'nb_actions_per_visit',
-			'bounce_rate',
-			'avg_time_on_site'
-		);
+        if (!$archiveProcessing->shouldProcessReportsForPlugin($this->getPluginName())) return;
 
-		$period = Piwik_Common::getRequestVar('period', false);
-		if ($period == 'day') {
-			// add number of unique (returning) visitors for period=day
-			$selectableColumns = array_merge(
-				array($selectableColumns[0]),
-				array('nb_uniq_visitors_returning'),
-				array_slice($selectableColumns, 1, -4),
-				array('nb_uniq_visitors'),
-				array_slice($selectableColumns, -4));
-		}
+        $numericToSum = array(
+            'nb_visits_returning',
+            'nb_actions_returning',
+            'sum_visit_length_returning',
+            'bounce_count_returning',
+            'nb_visits_converted_returning',
+        );
+        $archiveProcessing->archiveNumericValuesSum($numericToSum);
+        $archiveProcessing->archiveNumericValuesMax('max_actions_returning');
+    }
 
-		$idSite = Piwik_Common::getRequestVar('idSite');
-		$period = Piwik_Common::getRequestVar('period');
-		$date   = Piwik_Common::getRequestVar('date');
-		$meta   = Piwik_API_API::getInstance()->getReportMetadata($idSite, $period, $date);
+    /**
+     * @param Piwik_Event_Notification $notification  notification object
+     * @return mixed
+     */
+    function archiveDay($notification)
+    {
+        /* @var $archiveProcessing Piwik_ArchiveProcessing */
+        $archiveProcessing = $notification->getNotificationObject();
 
-		$columns      = array_merge($columnsToDisplay, $selectableColumns);
-		$translations = array();
-		foreach ($meta as $reportMeta) {
-			if ($reportMeta['action'] == 'get' && !isset($reportMeta['parameters'])) {
-				foreach ($columns as $column) {
-					if (isset($reportMeta['metrics'][$column])) {
-						$translations[$column] = $reportMeta['metrics'][$column];
-					}
-				}
-			}
-		}
+        if (!$archiveProcessing->shouldProcessReportsForPlugin($this->getPluginName())) return;
 
-		Piwik_DataTableList::getInstance()->add('VisitFrequency-getEvolutionGraph', array(
-			'apiMethod'           => 'API.get',
-			'viewDataTable'       => 'graphEvolution',
-			'reportDocumentation' => $documentation,
-			'columnsToTranslate'  => $translations,
-			'columnsToDisplay'    => implode(',', $columnsToDisplay),
-			'selectableColumns'   => $selectableColumns,
-		), 'General_Visitors', 'VisitFrequency_WidgetGraphReturning');
-	}
-
-	function addMenu()
-	{
-		Piwik_AddMenu('General_Visitors', 'VisitFrequency_SubmenuFrequency', array('module' => 'VisitFrequency', 'action' => 'index'));
-	}
-
-	/**
-	 * @param Piwik_Event_Notification $notification  notification object
-	 * @return mixed
-	 */
-	function archivePeriod( $notification )
-	{
-		$archiveProcessing = $notification->getNotificationObject();
-		
-		if(!$archiveProcessing->shouldProcessReportsForPlugin($this->getPluginName())) return;
-		
-		$numericToSum = array(
-				'nb_visits_returning',
-				'nb_actions_returning',
-				'sum_visit_length_returning',
-				'bounce_count_returning',
-				'nb_visits_converted_returning',
-		);
-		$archiveProcessing->archiveNumericValuesSum($numericToSum);
-		$archiveProcessing->archiveNumericValuesMax('max_actions_returning');
-	}
-
-	/**
-	 * @param Piwik_Event_Notification $notification  notification object
-	 * @return mixed
-	 */
-	function archiveDay($notification)
-	{
-		/* @var $archiveProcessing Piwik_ArchiveProcessing */
-		$archiveProcessing = $notification->getNotificationObject();
-		
-		if(!$archiveProcessing->shouldProcessReportsForPlugin($this->getPluginName())) return;
-		
-		$select = "count(distinct log_visit.idvisitor) as nb_uniq_visitors_returning,
+        $select = "count(distinct log_visit.idvisitor) as nb_uniq_visitors_returning,
 				count(*) as nb_visits_returning,
 				sum(log_visit.visit_total_actions) as nb_actions_returning,
 				max(log_visit.visit_total_actions) as max_actions_returning,
 				sum(log_visit.visit_total_time) as sum_visit_length_returning,
 				sum(case log_visit.visit_total_actions when 1 then 1 when 0 then 1 else 0 end) as bounce_count_returning,
 				sum(case log_visit.visit_goal_converted when 1 then 1 else 0 end) as nb_visits_converted_returning";
-		
-		$from = "log_visit";
-		
-		$where = "log_visit.visit_last_action_time >= ?
+
+        $from = "log_visit";
+
+        $where = "log_visit.visit_last_action_time >= ?
 				AND log_visit.visit_last_action_time <= ?
 		 		AND log_visit.idsite = ?
 		 		AND log_visit.visitor_returning >= 1";
-		
-		$bind = array($archiveProcessing->getStartDatetimeUTC(), 
-					$archiveProcessing->getEndDatetimeUTC(), $archiveProcessing->idsite);
-		
-		$query = $archiveProcessing->getSegment()->getSelectQuery($select, $from, $where, $bind);
-		
-		$row = $archiveProcessing->db->fetchRow($query['sql'], $query['bind']);
-		
-		if($row === false || $row === null)
-		{
-			$row['nb_visits_returning'] = 0;
-			$row['nb_actions_returning'] = 0;
-			$row['max_actions_returning'] = 0;
-			$row['sum_visit_length_returning'] = 0;
-			$row['bounce_count_returning'] = 0;
-			$row['nb_visits_converted_returning'] = 0;
-		}
-		
-		foreach($row as $name => $value)
-		{
-			$archiveProcessing->insertNumericRecord($name, $value);
-		}
-	}
+
+        $bind = array($archiveProcessing->getStartDatetimeUTC(),
+                      $archiveProcessing->getEndDatetimeUTC(), $archiveProcessing->idsite);
+
+        $query = $archiveProcessing->getSegment()->getSelectQuery($select, $from, $where, $bind);
+
+        $row = $archiveProcessing->db->fetchRow($query['sql'], $query['bind']);
+
+        if ($row === false || $row === null) {
+            $row['nb_visits_returning'] = 0;
+            $row['nb_actions_returning'] = 0;
+            $row['max_actions_returning'] = 0;
+            $row['sum_visit_length_returning'] = 0;
+            $row['bounce_count_returning'] = 0;
+            $row['nb_visits_converted_returning'] = 0;
+        }
+
+        foreach ($row as $name => $value) {
+            $archiveProcessing->insertNumericRecord($name, $value);
+        }
+    }
 }
 

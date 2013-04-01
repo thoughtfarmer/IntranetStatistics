@@ -20,14 +20,14 @@ class WidgetsListTest extends DatabaseTestCase
         FakeAccess::$superUser = true;
         Zend_Registry::set('access', $pseudoMockAccess);
 
-        IntegrationTestCase::createWebsite('2009-01-04 00:11:42');
+        Test_Piwik_BaseFixture::createWebsite('2009-01-04 00:11:42');
 
         $_GET['idSite'] = 1;
         $_GET['period'] = 'month';
         $_GET['date']   = date('d-m-Y');
 
         $pluginsManager = Piwik_PluginsManager::getInstance();
-        $pluginsToLoad  = Piwik_Config::getInstance()->Plugins['Plugins'];
+        $pluginsToLoad = Piwik_Config::getInstance()->Plugins['Plugins'];
         $pluginsManager->loadPlugins($pluginsToLoad);
 
         Piwik_WidgetsList::_reset();
@@ -40,19 +40,19 @@ class WidgetsListTest extends DatabaseTestCase
         // check if each category has the right number of widgets
         $numberOfWidgets = array(
             'VisitsSummary_VisitsSummary'  => 6,
-		'Live!'                        => 2,
-	        'General_Visitors'             => 12,
-	        'UserSettings_VisitorSettings' => 11,
-	        'Actions_Actions'              => 8,
-	        'Actions_SubmenuSitesearch'    => 5,
-	        'Referers_Referers'            => 7,
-	        'Goals_Goals'                  => 1,
+            'Live!'                        => 3,
+            'General_Visitors'             => 12,
+            'UserSettings_VisitorSettings' => 11,
+            'Actions_Actions'              => 8,
+            'Actions_SubmenuSitesearch'    => 5,
+            'Referers_Referers'            => 7,
+            'Goals_Goals'                  => 1,
             'SEO'                          => 2,
             'Example Widgets'              => 4,
             'ExamplePlugin_exampleWidgets' => 3
         );
         foreach ($numberOfWidgets AS $category => $widgetCount) {
-            $this->assertEquals($widgetCount, count($widgets[$category]));
+            $this->assertEquals($widgetCount, count($widgets[$category]), sprintf("Widget: %s", $category));
         }
     }
 
@@ -68,7 +68,7 @@ class WidgetsListTest extends DatabaseTestCase
         FakeAccess::$superUser = true;
         Zend_Registry::set('access', $pseudoMockAccess);
 
-        IntegrationTestCase::createWebsite('2009-01-04 00:11:42');
+        Test_Piwik_BaseFixture::createWebsite('2009-01-04 00:11:42');
         Piwik_Goals_API::getInstance()->addGoal(1, 'Goal 1 - Thank you', 'title', 'Thank you', 'contains', $caseSensitive = false, $revenue = 10, $allowMultipleConversions = 1);
 
         $_GET['idSite'] = 1;
@@ -76,7 +76,7 @@ class WidgetsListTest extends DatabaseTestCase
         $_GET['date']   = date('d-m-Y');
 
         $pluginsManager = Piwik_PluginsManager::getInstance();
-        $pluginsToLoad  = Piwik_Config::getInstance()->Plugins['Plugins'];
+        $pluginsToLoad = Piwik_Config::getInstance()->Plugins['Plugins'];
         $pluginsManager->loadPlugins($pluginsToLoad);
 
         Piwik_WidgetsList::_reset();
@@ -88,12 +88,12 @@ class WidgetsListTest extends DatabaseTestCase
 
         // check that the goal widget was added
         $numberOfWidgets = array(
-            'Goals_Goals'                  => 2,
+            'Goals_Goals' => 2,
         );
 
         foreach ($numberOfWidgets AS $category => $widgetCount) {
-	        $expected = count($widgets[$category]);
-	        $this->assertEquals($widgetCount, count($widgets[$category]));
+            $expected = count($widgets[$category]);
+            $this->assertEquals($widgetCount, count($widgets[$category]));
         }
     }
 
@@ -109,7 +109,7 @@ class WidgetsListTest extends DatabaseTestCase
         FakeAccess::$superUser = true;
         Zend_Registry::set('access', $pseudoMockAccess);
 
-        IntegrationTestCase::createWebsite('2009-01-04 00:11:42', true);
+        Test_Piwik_BaseFixture::createWebsite('2009-01-04 00:11:42', true);
         Piwik_Goals_API::getInstance()->addGoal(1, 'Goal 1 - Thank you', 'title', 'Thank you', 'contains', $caseSensitive = false, $revenue = 10, $allowMultipleConversions = 1);
 
         $_GET['idSite'] = 1;
@@ -117,7 +117,7 @@ class WidgetsListTest extends DatabaseTestCase
         $_GET['date']   = date('d-m-Y');
 
         $pluginsManager = Piwik_PluginsManager::getInstance();
-        $pluginsToLoad  = Piwik_Config::getInstance()->Plugins['Plugins'];
+        $pluginsToLoad = Piwik_Config::getInstance()->Plugins['Plugins'];
         $pluginsManager->loadPlugins($pluginsToLoad);
 
         Piwik_WidgetsList::_reset();
@@ -129,8 +129,8 @@ class WidgetsListTest extends DatabaseTestCase
 
         // check if each category has the right number of widgets
         $numberOfWidgets = array(
-            'Goals_Goals'                  => 2,
-            'Goals_Ecommerce'              => 5,
+            'Goals_Goals'     => 2,
+            'Goals_Ecommerce' => 5,
         );
 
         foreach ($numberOfWidgets AS $category => $widgetCount) {
