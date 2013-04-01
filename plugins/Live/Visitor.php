@@ -104,6 +104,7 @@ class Piwik_Live_Visitor
 			'screenTypeIcon' => $this->getScreenTypeIcon(),
 			'plugins' => $this->getPlugins(),
 			'pluginsIcons' => $this->getPluginIcons(),
+			'liveUsername' => $this->getLiveUsername()
 		);
 	}
 
@@ -540,5 +541,13 @@ class Piwik_Live_Visitor
 	function isVisitorGoalConverted()
 	{
 		return $this->details['visit_goal_converted'];
+	}
+
+	function getLiveUsername()
+	{
+		if(isset($this->details['thoughtfarmer_username'])){
+			return $this->details['thoughtfarmer_username'];
+		}
+		return false;
 	}
 }

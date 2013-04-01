@@ -1,4 +1,4 @@
-<?php
+<?php 
 $translations = array(
 	'General_Locale' => 'am_ET.UTF-8',
 	'General_TranslatorName' => '<a href="http://www.addismap.com/bandira/">Alazar Tekle</a>',

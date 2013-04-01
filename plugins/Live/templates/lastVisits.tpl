@@ -23,6 +23,7 @@
 				{if $visitor.visitorTypeIcon}
 					<a class="rightLink" href="javascript:broadcast.propagateAjax('module=Live&action=getVisitorLog&period=month&segment=visitorId=={$visitor.visitorId}')">
 					&nbsp;- <img src="{$visitor.visitorTypeIcon}" title="{'General_ReturningVisitor'|translate} - {'General_ReturningVisitorAllVisits'|translate}" />
+                    &nbsp;{$visitor.liveUsername}                    
 					</a>
 				{/if}
 				{if $visitor.visitIp}- <span title="{if !empty($visitor.visitorId)}{'General_VisitorID'|translate}: {$visitor.visitorId}{/if}">IP: {$visitor.visitIp}</span>{/if}

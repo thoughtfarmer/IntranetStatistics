@@ -1,4 +1,5 @@
 {include file="Login/templates/header.tpl"}
+{include file="Login/templates/termsAndConditions.tpl"}
 
 <section id="login">
 
@@ -38,10 +39,15 @@
 		<input type="password" name="form_password" id="login_form_password" class="input" value="" size="20" tabindex="20" placeholder="{'Login_Password'|translate}" />
 		<input type="hidden" name="form_nonce" id="login_form_nonce" value="{$nonce}" />
 	</fieldset>
+    
+	<p class="acceptTermsCheckbox">
+		<label><input name="form_acceptterms" id="form_acceptterms" value="1" tabindex="89" type="checkbox" /> I accept the </label> <a id="termsLink" href="#">Terms and Conditions </a>
+	</p>
 
 	<fieldset class="actions">
 		<input name="form_rememberme" type="checkbox" id="login_form_rememberme" value="1" tabindex="90" {if $form_data.form_rememberme.value}checked="checked" {/if}/>
 		<label for="login_form_rememberme">{'Login_RememberMe'|translate}</label>
+
 		<input class="submit" id='login_form_submit' type="submit" value="{'Login_LogIn'|translate}" tabindex="100" />
 	</fieldset>
 </form>

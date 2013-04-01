@@ -165,6 +165,14 @@ abstract class Piwik_ViewDataTable
 	protected $columnsToDisplay = array();
 
 	/**
+	 * Array of columns set to display in table
+	 *
+	 * @var array
+	 */
+	protected $tableAllColumnsToDisplay = array();
+
+
+	/**
 	 * Variable that is used as the DIV ID in the rendered HTML
 	 *
 	 * @var string
@@ -1255,6 +1263,19 @@ abstract class Piwik_ViewDataTable
 			}
 		}
 		$this->columnsToDisplay = array_filter($columnsNames);
+	}
+
+	/**
+	 * Overrides the columns that will be displayed in the HTML output all columns view
+	 * By default they are defined in Piwik_ViewDataTable_HtmlTable_AllColumns class
+	 */
+	public function setTableAllColumnsToDisplay( $columnsNames )
+	{
+		if(!is_array($columnsNames))
+		{
+			$columnsNames = array($columnsNames);
+		}
+		$this->tableAllColumnsToDisplay = $columnsNames;
 	}
 
 	/**

@@ -93,7 +93,7 @@ class Piwik_Goals_API
 	 */
 	public function addGoal( $idSite, $name, $matchAttribute, $pattern, $patternType, $caseSensitive = false, $revenue = false, $allowMultipleConversionsPerVisit = false)
 	{
-		Piwik::checkUserHasAdminAccess($idSite);
+		Piwik::checkUserHasViewAccess($idSite);
 		$this->checkPatternIsValid($patternType, $pattern);
 		$name = $this->checkName($name);
 		$pattern = $this->checkPattern($pattern);
@@ -142,7 +142,7 @@ class Piwik_Goals_API
 	 */
 	public function updateGoal( $idSite, $idGoal, $name, $matchAttribute, $pattern, $patternType, $caseSensitive = false, $revenue = false, $allowMultipleConversionsPerVisit = false)
 	{
-		Piwik::checkUserHasAdminAccess($idSite);
+		Piwik::checkUserHasViewAccess($idSite);
 		$name = $this->checkName($name);
 		$pattern = $this->checkPattern($pattern);
 		$this->checkPatternIsValid($patternType, $pattern);
@@ -190,7 +190,7 @@ class Piwik_Goals_API
 	 */
 	public function deleteGoal( $idSite, $idGoal )
 	{
-		Piwik::checkUserHasAdminAccess($idSite);
+		Piwik::checkUserHasViewAccess($idSite);
 		Piwik_Query("UPDATE ".Piwik_Common::prefixTable('goal')."
 										SET deleted = 1
 										WHERE idsite = ? 

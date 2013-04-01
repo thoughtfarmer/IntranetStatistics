@@ -48,9 +48,9 @@ interface Piwik_Tracker_Action_Interface {
 class Piwik_Tracker_Action implements Piwik_Tracker_Action_Interface
 {
 	private $request;
-	private $idSite;
-	private $timestamp;
-	private $idLinkVisitAction;
+	protected $idSite;
+	protected $timestamp;
+	protected $idLinkVisitAction;
 	private $idActionName = false;
 	private $idActionUrl = false;
 
@@ -661,6 +661,11 @@ class Piwik_Tracker_Action implements Piwik_Tracker_Action_Interface
 	function setIdSite($idSite)
 	{
 		$this->idSite = $idSite;
+	}
+
+	public function getIdSite()
+	{
+		return $this->idSite;
 	}
 	
 	function setTimestamp($timestamp)

@@ -215,7 +215,7 @@ class Piwik_Goals_Controller extends Piwik_Controller
 	{
 		$view = $this->getOverviewView();
 		$view->goalsJSON = Piwik_Common::json_encode($this->goals);
-		$view->userCanEditGoals = Piwik::isUserHasAdminAccess($this->idSite);
+		$view->userCanEditGoals = Piwik::isUserHasViewAccess($this->idSite);
 		$view->ecommerceEnabled = $this->site->isEcommerceEnabled();
 		$view->displayFullReport = true;
 		echo $view->render();
@@ -287,7 +287,7 @@ class Piwik_Goals_Controller extends Piwik_Controller
 	{
 		$view = Piwik_View::factory('add_new_goal');
 		$this->setGeneralVariablesView($view);
-		$view->userCanEditGoals = Piwik::isUserHasAdminAccess($this->idSite);
+		$view->userCanEditGoals = Piwik::isUserHasViewAccess($this->idSite);
 		$view->onlyShowAddNewGoal = true;
 		echo $view->render();
 	}

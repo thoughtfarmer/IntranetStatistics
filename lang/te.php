@@ -1,4 +1,4 @@
-<?php
+<?php 
 $translations = array(
 	'General_Locale' => 'te_IN.UTF-8',
 	'General_TranslatorName' => 'వీవెన్ (Veeven)',
@@ -850,8 +850,6 @@ $translations = array(
 	'UserLanguage_Language_za' => 'జువాన్',
 	'UserLanguage_Language_zh' => 'చైనీస్',
 	'UserLanguage_Language_zu' => 'జూలూ',
-
-	// FOR REVIEW
 	'Forecast_Visitors' => 'సందర్శకులు',
 	'UserLanguage_Language' => 'భాషలు',
 	'UserLanguage_SubmenuLanguage' => 'భాషలు',
