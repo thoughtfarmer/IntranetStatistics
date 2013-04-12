@@ -35,7 +35,7 @@ $(document).ready( function(){
 <div id="main">
 	<div id="content">
 		<div id="logo">
-			<img id="title" width='160' src="/themes/logo.png"/> &nbsp;&nbsp;&nbsp;<!--<span id="subtitle"># {'General_OpenSourceWebAnalytics'|translate}</span>-->
+			<img id="title" width='400' src="/themes/logo.png"/> &nbsp;&nbsp;&nbsp;<!--<span id="subtitle"># {'General_OpenSourceWebAnalytics'|translate}</span>-->
 		</div>
 		<div style="float:right" id="topRightBar">
 		<br />
