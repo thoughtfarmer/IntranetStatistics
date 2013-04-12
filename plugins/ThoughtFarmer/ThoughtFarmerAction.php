@@ -36,7 +36,7 @@ class Piwik_ThoughtFarmer_Action extends Piwik_Tracker_Action
 	// rewrite action name in order to use site's main_url
 	protected function rewriteActionName()
 	{
-		$websiteData = Piwik_Common::getCacheWebsiteAttributes($this->getIdSite());
+		$websiteData = Piwik_Tracker_Cache::getCacheWebsiteAttributes($this->getIdSite());
 
 		if(isset($websiteData['hosts']))
 		{
