@@ -170,7 +170,7 @@ class Piwik_Dashboard_Controller extends Piwik_Controller
         }
         $login = Piwik::getCurrentUserLogin();
 
-        $dashboards = Piwik_Dashboard::getAllDashboards($login);
+            $dashboards = Piwik_Dashboard::getAllDashboards($login);
 
         Piwik_DataTable_Renderer_Json::sendHeaderJSON();
         echo Piwik_Common::json_encode($dashboards);
@@ -191,13 +191,13 @@ class Piwik_Dashboard_Controller extends Piwik_Controller
         $user  = Piwik::getCurrentUserLogin();
         $nextId = $this->getNextIdDashboard($user);
 
-        $name   = urldecode(Piwik_Common::getRequestVar('name', '', 'string'));
-        $type   = urldecode(Piwik_Common::getRequestVar('type', 'default', 'string'));
-        $layout = '{}';
+            $name   = urldecode(Piwik_Common::getRequestVar('name', '', 'string'));
+            $type   = urldecode(Piwik_Common::getRequestVar('type', 'default', 'string'));
+            $layout = '{}';
 
-        if ($type == 'default') {
-            $layout = $this->getDefaultLayout();
-        }
+            if ($type == 'default') {
+                $layout = $this->getDefaultLayout();
+            }
 
         $query = sprintf('INSERT INTO %s (login, iddashboard, name, layout) VALUES (?, ?, ?, ?)',
                          Piwik_Common::prefixTable('user_dashboard'));
@@ -234,8 +234,8 @@ class Piwik_Dashboard_Controller extends Piwik_Controller
         $idDashboard = Piwik_Common::getRequestVar('dashboardId', 0, 'int');
         $layout      = $this->_getLayoutForUser($login, $idDashboard);
 
-        if($layout !== false) {
-	        $nextId = $this->getNextIdDashboard($user);
+	        if($layout !== false) {
+		        $nextId = $this->getNextIdDashboard($user);
 
 	        $query = sprintf('INSERT INTO %s (login, iddashboard, name, layout) VALUES (?, ?, ?, ?)',
 		        Piwik_Common::prefixTable('user_dashboard'));
@@ -363,37 +363,29 @@ class Piwik_Dashboard_Controller extends Piwik_Controller
         $defaultLayout = $this->_getLayoutForUser('', 1);
 
         if (empty($defaultLayout)) {
-        	$topWidget = '';
+        	$donateWidget = '';
         	if (Piwik::isUserIsSuperUser())
         	{
-        		$topWidget = '{"uniqueId":"widgetCoreHomegetDonateForm",'
-        				   .  '"parameters":{"module":"CoreHome","action":"getDonateForm"}},';
-        	}
-        	else
-        	{
-        		$topWidget = '{"uniqueId":"widgetCoreHomegetPromoVideo",'
-        				   .  '"parameters":{"module":"CoreHome","action":"getPromoVideo"}},';
+        		$donateWidget = '{"uniqueId":"widgetCoreHomegetDonateForm",'
+        					  .  '"parameters":{"module":"CoreHome","action":"getDonateForm"}},';
         	}
         	
             $defaultLayout = '[
                 [
-                    {"uniqueId":"widgetVisitsSummarygetEvolutionGraphcolumnsArray","parameters":{"module":"VisitsSummary","action":"getEvolutionGraph","columns":"nb_visits"}},
-                    {"uniqueId":"widgetLivewidget","parameters":{"module":"Live","action":"widget"}},
-                    {"uniqueId":"widgetVisitorInterestgetNumberOfVisitsPerVisitDuration","parameters":{"module":"VisitorInterest","action":"getNumberOfVisitsPerVisitDuration"}}
+                                {"uniqueId":"widgetThoughtFarmergetUserActivity","parameters":{"module":"ThoughtFarmer","action":"getUserActivity","viewDataTable":"table"}},
+                                {"uniqueId":"widgetThoughtFarmergetPageHierarchy","parameters":{"module":"ThoughtFarmer","action":"getPageHierarchy"}},
+                                {"uniqueId":"widgetUserSettingsgetBrowser","parameters":{"module":"UserSettings","action":"getBrowser","viewDataTable":"graphPie"}}
                 ],
                 [
-                	'.$topWidget.'
-                    {"uniqueId":"widgetReferersgetKeywords","parameters":{"module":"Referers","action":"getKeywords"}},
-                    {"uniqueId":"widgetReferersgetWebsites","parameters":{"module":"Referers","action":"getWebsites"}}
+                                {"uniqueId":"widgetThoughtFarmergetSearches","parameters":{"module":"ThoughtFarmer","action":"getSearches"}},
+                                {"uniqueId":"widgetVisitTimegetVisitInformationPerServerTime","parameters":{"module":"VisitTime","action":"getVisitInformationPerServerTime"}},
+                                {"uniqueId":"widgetVisitsSummarygetEvolutionGraphcolumnsArray","parameters":{"module":"VisitsSummary","action":"getEvolutionGraph","columns":["nb_visits"]}}
                 ],
                 [
-                    {"uniqueId":"widgetUserCountryMapvisitorMap","parameters":{"module":"UserCountryMap","action":"visitorMap"}},
-                    {"uniqueId":"widgetUserSettingsgetBrowser","parameters":{"module":"UserSettings","action":"getBrowser"}},
-                    {"uniqueId":"widgetReferersgetSearchEngines","parameters":{"module":"Referers","action":"getSearchEngines"}},
-                    {"uniqueId":"widgetVisitTimegetVisitInformationPerServerTime","parameters":{"module":"VisitTime","action":"getVisitInformationPerServerTime"}},
-                    {"uniqueId":"widgetExampleRssWidgetrssPiwik","parameters":{"module":"ExampleRssWidget","action":"rssPiwik"}}
+                                {"uniqueId":"widgetLivewidget","parameters":{"module":"Live","action":"widget"}}
                 ]
             ]';
+
         }
         $defaultLayout = $this->removeDisabledPluginFromLayout($defaultLayout);
         return $defaultLayout;

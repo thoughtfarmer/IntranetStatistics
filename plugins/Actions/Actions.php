@@ -511,7 +511,6 @@ class Piwik_Actions extends Piwik_Plugin
 	function addWidgets()
 	{
 		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuPages', 'Actions', 'getPageUrls');
-		Piwik_AddWidget( 'Actions_Actions', 'Actions_WidgetPageTitles', 'Actions', 'getPageTitles');
 		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuOutlinks', 'Actions', 'getOutlinks');
 		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuDownloads', 'Actions', 'getDownloads');
 		Piwik_AddWidget( 'Actions_Actions', 'Actions_WidgetPagesEntry', 'Actions', 'getEntryPageUrls');
@@ -534,11 +533,10 @@ class Piwik_Actions extends Piwik_Plugin
 	
 	function addMenus()
 	{
-		Piwik_AddMenu('Actions_Actions', '', array('module' => 'Actions', 'action' => 'indexPageUrls'), true, 15);
-		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuPages', array('module' => 'Actions', 'action' => 'indexPageUrls'), true, 1);
-		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuPagesEntry', array('module' => 'Actions', 'action' => 'indexEntryPageUrls'), true, 2);
+		Piwik_AddMenu('Actions_Actions', '', array('module' => 'ThoughtFarmer', 'action' => 'getPageHierarchy'), true, 15);
+		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuPages', array('module' => 'Actions', 'action' => 'indexPageUrls'), true, 2);
+		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuPagesEntry', array('module' => 'Actions', 'action' => 'indexEntryPageUrls'), true, 3);
 		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuPagesExit', array('module' => 'Actions', 'action' => 'indexExitPageUrls'), true, 3);
-		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuPageTitles', array('module' => 'Actions', 'action' => 'indexPageTitles'), true, 4);
 		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuOutlinks', array('module' => 'Actions', 'action' => 'indexOutlinks'), true, 6);
 		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuDownloads', array('module' => 'Actions', 'action' => 'indexDownloads'), true, 7);
 

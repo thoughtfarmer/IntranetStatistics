@@ -9,4 +9,4 @@
 </head>
 <body id="simple">
 <div id="contentsimple">
-	<div id="title"><img title='Piwik' alt="Piwik" src='themes/default/images/logo-header.png' style='margin-left:10px' /><span id="subh1"> # <a href='http://piwik.org/'>Web Analytics</a></span></div>
+	<div id="title"><img title='Intranet Statistics' alt="Intranet Statistics" src='themes/default/images/logo-header.png' style='margin-left:10px' /><span id="subh1"> # <a href='http://www.intranetstatistics.com/'>Intranet Statistics</a></span></div>

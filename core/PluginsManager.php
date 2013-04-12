@@ -132,7 +132,8 @@ class Piwik_PluginsManager
 	 */
 	public function isPluginActivated( $name )
 	{
-		return in_array( $name, $this->pluginsToLoad)
+		$search_array = array_map('strtolower', $this->pluginsToLoad);
+		return in_array( strtolower($name), $search_array)
 			|| $this->isPluginAlwaysActivated( $name );
 	}
 

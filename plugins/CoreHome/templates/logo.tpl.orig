@@ -1,0 +1,15 @@
+<span id="logo">
+<<<<<<< HEAD
+<a href="index.php" title="{if $isCustomLogo}{'General_PoweredBy'|translate} {/if}Piwik # {'General_OpenSourceWebAnalytics'|translate}" style="text-decoration: none;">
+	<!-- logo background supplied via ThoughtFarmer custom CSS -->
+=======
+<a href="index.php" title="Intranet Statistics" style="text-decoration: none;">
+	{if $hasSVGLogo}
+	<img src='{$logoSVG}' alt="{if $isCustomLogo}{'General_PoweredBy'|translate} {/if}Piwik" style='margin-left: 10px' height='57' class="ie-hide" />
+	<!--[if lt IE 9]>
+	{/if}
+	<img src='{$logoHeader}' alt="{if $isCustomLogo}{'General_PoweredBy'|translate} {/if}Piwik" style='margin-left:10px' height='57' />
+	{if $hasSVGLogo}<![endif]-->{/if}
+>>>>>>> ab98c5a946bb8060e0514563fd1bc1373fd89dae
+</a>
+</span>

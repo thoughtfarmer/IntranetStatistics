@@ -1576,8 +1576,16 @@ class Piwik_Tracker_Visit implements Piwik_Tracker_Visit_Interface
 	 */
 	protected function getConfigHash( $os, $browserName, $browserVersion, $resolution, $plugin_Flash, $plugin_Java, $plugin_Director, $plugin_Quicktime, $plugin_RealPlayer, $plugin_PDF, $plugin_WindowsMedia, $plugin_Gears, $plugin_Silverlight, $plugin_Cookie, $ip, $browserLang)
 	{
-		$hash = md5( $os . $browserName . $browserVersion . $plugin_Flash . $plugin_Java . $plugin_Director . $plugin_Quicktime . $plugin_RealPlayer . $plugin_PDF . $plugin_WindowsMedia . $plugin_Gears . $plugin_Silverlight . $plugin_Cookie . $ip . $browserLang, $raw_output = true );
-		return Piwik_Common::substr( $hash, 0, Piwik_Tracker::LENGTH_BINARY_ID );
+ 		$thoughtFarmerUsername = "";
+ 		if( isset($_GET['data']) && ($customVariables = json_decode($_GET['data'],true)) !== null )
+ 		{
+ 			if( isset($customVariables['ThoughtFarmer_username']) )
+ 			{
+ 				$thoughtFarmerUsername = $customVariables['ThoughtFarmer_username'];		
+ 			}
+ 		}	
+ 		$hash = md5($thoughtFarmerUsername . $os . $browserName . $browserVersion . $plugin_Flash . $plugin_Java . $plugin_Director . $plugin_Quicktime . $plugin_RealPlayer . $plugin_PDF . $plugin_WindowsMedia . $plugin_Gears . $plugin_Silverlight . $plugin_Cookie . $ip . $browserLang, $raw_output = true );
+        return Piwik_Common::substr( $hash, 0, Piwik_Tracker::LENGTH_BINARY_ID );
 	}
 
 	/**

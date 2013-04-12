@@ -529,6 +529,8 @@ class Piwik_SitesManager_API
 			$bind['group'] = "";
 		}
 		
+		$this->obfuscateNextSiteId();
+		
 		$db->insert(Piwik_Common::prefixTable("site"), $bind);
 									
 		$idSite = $db->lastInsertId();
@@ -542,6 +544,22 @@ class Piwik_SitesManager_API
 		Piwik_PostEvent('SitesManager.addSite', $idSite);
 
 		return (int)$idSite;
+	}
+	
+	// sets the next auto_increment value for the piwik_site.idsite column to the current
+	// max value plus a large random number.
+	private function obfuscateNextSiteId()
+	{
+		$db = Zend_Registry::get('db');
+	
+	     // get the biggest id in the Piwik_Site table
+		$row = $db->fetchRow("SELECT MAX(idsite) AS maxid FROM ".Piwik_Common::prefixTable("site"));
+		
+		// add a random number between 1,000 and 9,999
+		$newId = $row['maxid'] + rand(1000, 9999);
+		
+		// reseed the identity column with the new id
+		$db->query("ALTER TABLE ".Piwik_Common::prefixTable("site")." AUTO_INCREMENT = ". $newId);
 	}
 	
 	private function postUpdateWebsite($idSite)

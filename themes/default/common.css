@@ -178,7 +178,7 @@ a {
 	position: absolute;
 	right:4px;
 	overflow:hidden; 
-	display:block; 
+	display:none; 
 	height:20px;
 	line-height:20px;
 	padding:5px 8px 5px 38px;
@@ -227,6 +227,13 @@ a {
 #logo {
 	display: block;
 	height:40px;
+}
+
+#logo a {
+ display: block;
+ background: url(../../themes/logo.png) no-repeat 0 0;
+ width: 315px;
+ height: 57px;
 }
 
 /*sites_autocomplete*/

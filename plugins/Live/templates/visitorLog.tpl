@@ -107,6 +107,7 @@
 					<br/>
 					{$visitorColumnContent}
 				{/if}
+				<br />{$visitor.columns.liveUsername}				
 	</td>
 	
 	{if $displayVisitorsInOwnColumn}

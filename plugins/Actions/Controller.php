@@ -47,6 +47,14 @@ class Piwik_Actions_Controller extends Piwik_Controller
 		return $this->renderView($view, $fetch);
 	}
 
+	protected function configureViewPageTitles($view)
+	{
+		$view->setColumnsToDisplay( array('label','nb_hits','nb_visits','nb_page_edit','nb_page_comment') );
+
+		$view->setColumnTranslation('nb_page_edit', 'Edits');
+		$view->setColumnTranslation('nb_page_comment', 'Comments');
+	}
+
 	protected function configureViewPages($view)
 	{
 		$view->setColumnsToDisplay( array('label','nb_hits','nb_visits', 'bounce_rate', 'avg_time_on_page', 'exit_rate') );
@@ -236,7 +244,6 @@ class Piwik_Actions_Controller extends Piwik_Controller
 			'Actions.getExitPageTitles' => Piwik_Translate('Actions_ExitPageTitles'),
 		));
 		$view->setReportUrl('Actions', $this->getPageTitlesActionForLink());
-		$this->configureViewPages($view);
 		$this->configureViewActions($view);
 		return $this->renderView($view, $fetch);
 	}
@@ -248,7 +255,7 @@ class Piwik_Actions_Controller extends Piwik_Controller
 						__FUNCTION__,
 						'Actions.getPageTitles',
 						'getPageTitlesSubDataTable'  );
-		$this->configureViewPages($view);
+		$this->configureViewPageTitles($view);
 		$this->configureViewActions($view);
 		return $this->renderView($view, $fetch);
 	}

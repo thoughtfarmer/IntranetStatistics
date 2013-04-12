@@ -669,69 +669,6 @@ class Piwik
 		$messages = array();
 		$messages[] = true;
 
-		// ignore dev environments
-		if(file_exists(PIWIK_INCLUDE_PATH . '/.git'))
-		{
-			$messages[] = Piwik_Translate('General_WarningFileIntegritySkipped');
-			return $messages;
-		}
-
-		$manifest = PIWIK_INCLUDE_PATH . '/config/manifest.inc.php';
-		if(!file_exists($manifest))
-		{
-			$messages[] = Piwik_Translate('General_WarningFileIntegrityNoManifest');
-			return $messages;
-		}
-
-		require_once $manifest;
-
-		$files = Manifest::$files;
-
-		$hasMd5file = function_exists('md5_file');
-		$hasMd5 = function_exists('md5');
-		foreach($files as $path => $props)
-		{
-			$file = PIWIK_INCLUDE_PATH . '/' . $path;
-
-			if(!file_exists($file))
-			{
-				$messages[] = Piwik_Translate('General_ExceptionMissingFile', $file);
-			}
-			else if(filesize($file) != $props[0])
-			{
-				if(!$hasMd5 || in_array(substr($path, -4), array('.gif', '.ico', '.jpg', '.png', '.swf')))
-				{
-					// files that contain binary data (e.g., images) must match the file size
-					$messages[] = Piwik_Translate('General_ExceptionFilesizeMismatch', array($file, $props[0], filesize($file)));
-				}
-				else
-				{
-					// convert end-of-line characters and re-test text files
-					$content = @file_get_contents($file);
-					$content = str_replace("\r\n", "\n", $content);
-					if((strlen($content) != $props[0])
-						|| (@md5($content) !== $props[1]))
-					{
-						$messages[] = Piwik_Translate('General_ExceptionFilesizeMismatch', array($file, $props[0], filesize($file)));
-					}
-				}
-			}
-			else if($hasMd5file && (@md5_file($file) !== $props[1]))
-			{
-				$messages[] = Piwik_Translate('General_ExceptionFileIntegrity', $file);
-			}
-		}
-
-		if(count($messages) > 1)
-		{
-			$messages[0] = false;
-		}
-
-		if(!$hasMd5file)
-		{
-			$messages[] = Piwik_Translate('General_WarningFileIntegrityNoMd5file');
-		}
-
 		return $messages;
 	}
 
