@@ -41,9 +41,4 @@
 {include file="CoreHome/templates/iframe_buster_body.tpl"}
 <div id="logo">
     <img src='/Themes/logo.png' title="{$linkTitle}" alt="Intranet Statistics" width="240" style='margin-right: 20px' />
-    {if !$isCustomLogo}</a>
-    <div class="description"><a href="http://piwik.org" title="{$linkTitle}">{$linkTitle}</a>
-        <div class="arrow"> </div>
-    </div>
-    {/if}
 </div>
