@@ -40,5 +40,5 @@
 <body class="login">
 {include file="CoreHome/templates/iframe_buster_body.tpl"}
 <div id="logo">
-    <img src='/Themes/logo.png' title="{$linkTitle}" alt="Intranet Statistics" width="240" style='margin-right: 20px' />
+    <img src='/themes/logo.png' title="{$linkTitle}" alt="Intranet Statistics" width="240" style='margin-right: 20px' />
 </div>
