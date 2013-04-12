@@ -78,7 +78,7 @@ form {
 #login form { margin: 0 5px; position: relative; }
 #login form input[type="text"],
 #login form input[type="password"] {
-	padding: 10px 15px 10px 45px;
+	padding: 10px 15px 10px 5px;
 	margin: 0 0 15px 0;
 	width: 253px; /* 258 + 2 + 55 = 315 */
 	border: 1px solid #ccc;
