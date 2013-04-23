@@ -26,6 +26,11 @@
                     &nbsp;{$visitor.liveUsername}                    
 					</a>
 				{/if}
+                {if !$visitor.visitorTypeIcon && $visitor.liveUsername}
+                    <a class="rightLink" href="javascript:broadcast.propagateAjax('module=Live&action=getVisitorLog&period=month&segment=visitorId=={$visitor.visitorId}')">
+                        &nbsp;{$visitor.liveUsername}
+                    </a>
+                {/if}
 				{if $visitor.visitIp}- <span title="{if !empty($visitor.visitorId)}{'General_VisitorID'|translate}: {$visitor.visitorId}{/if}">IP: {$visitor.visitIp}</span>{/if}
 			</div>
 			<!--<div class="settings"></div>-->
