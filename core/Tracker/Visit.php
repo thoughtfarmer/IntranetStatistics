@@ -1174,16 +1174,23 @@ class Piwik_Tracker_Visit implements Piwik_Tracker_Visit_Interface
         $timeLookBack = $this->getWindowLookupPreviousVisit();
 
         $shouldMatchOneFieldOnly = $this->shouldLookupOneVisitorFieldOnly($isVisitorIdToLookup);
+        $shouldUseConfigIdOnly = $this->hasThoughtFarmerData();
 
-        // Two use cases:
+
+
+        // Three use cases:
 		// 1) there is no visitor ID so we try to match only on config_id (heuristics)
 		// 		Possible causes of no visitor ID: no browser cookie support, direct Tracking API request without visitor ID passed, etc.
 		// 		We can use config_id heuristics to try find the visitor in the past, there is a risk to assign 
 		// 		this page view to the wrong visitor, but this is better than creating artificial visits.
 		// 2) there is a visitor ID and we trust it (config setting trust_visitors_cookies, OR it was set using &cid= in tracking API),
         //      and in these cases, we force to look up this visitor id
-		if($shouldMatchOneFieldOnly)
+        // 3) We have ThoughtFarmer tracking data available. In this case config_id is a hash with the ThoughtFarmer_username, which is unique.
+        //      We may also have multiple users on the same workstation and browser. So in this case visitorID may not really indicate the same user.
+        //      Therefore, visitor_id AND config_id must be the visit identifier.
+        if($shouldMatchOneFieldOnly && !$shouldUseConfigIdOnly)
 		{
+
 			$where = "visit_last_action_time >= ? AND idsite = ?";
 			$bindSql[] = $timeLookBack;
 			$bindSql[] = $this->idsite;
@@ -1211,11 +1218,10 @@ class Piwik_Tracker_Visit implements Piwik_Tracker_Visit_Interface
 		// 		It is not acceptable to create a new visit every time such browser does a page view, 
 		// 		so we also backup by searching for matching config_id. 
 		// We use a UNION here so that each sql query uses its own INDEX
-		else
+		else if(!$shouldUseConfigIdOnly)
 		{
 			$whereSameBothQueries = "visit_last_action_time >= ? AND idsite = ?";
-			
-			
+
 			// will use INDEX index_idsite_config_datetime (idsite, config_id, visit_last_action_time)
 			$bindSql[] = $timeLookBack;
 			$bindSql[] = $this->idsite;
@@ -1248,6 +1254,26 @@ class Piwik_Tracker_Visit implements Piwik_Tracker_Visit_Interface
 					ORDER BY priority DESC 
 					LIMIT 1";
 		}
+        else
+        {
+            $whereSameBothQueries = "visit_last_action_time >= ? AND idsite = ?";
+
+            // will use INDEX index_idsite_config_datetime (idsite, config_id, visit_last_action_time)
+            $bindSql[] = $timeLookBack;
+            $bindSql[] = $this->idsite;
+            $where = ' AND config_id = ? AND idvisitor = ?';
+            $bindSql[] = $configId;
+            $bindSql[] = $this->visitorInfo['idvisitor'];
+            $sqlConfigId = "$select ,
+					0 as priority
+					$from
+					WHERE $whereSameBothQueries $where
+					ORDER BY visit_last_action_time DESC
+					LIMIT 1
+			";
+
+            $sql = $sqlConfigId;
+        }
 		
 		
 		$visitRow = Piwik_Tracker::getDatabase()->fetch($sql, $bindSql);
@@ -1587,6 +1613,18 @@ class Piwik_Tracker_Visit implements Piwik_Tracker_Visit_Interface
  		$hash = md5($thoughtFarmerUsername . $os . $browserName . $browserVersion . $plugin_Flash . $plugin_Java . $plugin_Director . $plugin_Quicktime . $plugin_RealPlayer . $plugin_PDF . $plugin_WindowsMedia . $plugin_Gears . $plugin_Silverlight . $plugin_Cookie . $ip . $browserLang, $raw_output = true );
         return Piwik_Common::substr( $hash, 0, Piwik_Tracker::LENGTH_BINARY_ID );
 	}
+
+    /**
+     * If ThoughtFarmer custom data is available for tracking then will return true
+     */
+    protected function hasThoughtFarmerData()
+    {
+        if( isset($_GET['data']) && ($customVariables = json_decode($_GET['data'],true)) !== null )
+        {
+            return isset($customVariables['ThoughtFarmer_username']) ;
+        }
+        return false;
+    }
 
 	/**
 	 * Returns either
