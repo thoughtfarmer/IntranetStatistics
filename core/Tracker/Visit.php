@@ -1174,7 +1174,7 @@ class Piwik_Tracker_Visit implements Piwik_Tracker_Visit_Interface
         $timeLookBack = $this->getWindowLookupPreviousVisit();
 
         $shouldMatchOneFieldOnly = $this->shouldLookupOneVisitorFieldOnly($isVisitorIdToLookup);
-        $shouldUseConfigIdOnly = $this->hasThoughtFarmerData();
+        $shouldUseConfigIdAndVisitorId = $this->hasThoughtFarmerData();
 
 
 
@@ -1188,7 +1188,7 @@ class Piwik_Tracker_Visit implements Piwik_Tracker_Visit_Interface
         // 3) We have ThoughtFarmer tracking data available. In this case config_id is a hash with the ThoughtFarmer_username, which is unique.
         //      We may also have multiple users on the same workstation and browser. So in this case visitorID may not really indicate the same user.
         //      Therefore, visitor_id AND config_id must be the visit identifier.
-        if($shouldMatchOneFieldOnly && !$shouldUseConfigIdOnly)
+        if($shouldMatchOneFieldOnly && !$shouldUseConfigIdAndVisitorId)
 		{
 
 			$where = "visit_last_action_time >= ? AND idsite = ?";
@@ -1218,7 +1218,7 @@ class Piwik_Tracker_Visit implements Piwik_Tracker_Visit_Interface
 		// 		It is not acceptable to create a new visit every time such browser does a page view, 
 		// 		so we also backup by searching for matching config_id. 
 		// We use a UNION here so that each sql query uses its own INDEX
-		else if(!$shouldUseConfigIdOnly)
+		else if(!$shouldUseConfigIdAndVisitorId)
 		{
 			$whereSameBothQueries = "visit_last_action_time >= ? AND idsite = ?";
 
